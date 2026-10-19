@@ -1,0 +1,12 @@
+include: package:flutter_lints/flutter.yaml
+
+analyzer:
+  exclude:
+    - lib/src/messages.g.dart
+    - build/**
+    - android/**
+    - ios/**
+
+linter:
+  rules:
+    - public_member_api_docs

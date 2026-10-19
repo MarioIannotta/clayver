@@ -1,0 +1,19 @@
+{
+  "rules": {
+    ".read": false,
+    ".write": false,
+    "clayver": {
+      "projects": {
+        "$p": {
+          ".validate": "$p.matches(/^[a-z0-9-]{1,40}$/)",
+          "conversations": {
+            ".indexOn": ["statusOrder"],
+            "$c": {
+              ".read": "auth != null && auth.uid === data.child('customerId').val()"
+            }
+          }
+        }
+      }
+    }
+  }
+}

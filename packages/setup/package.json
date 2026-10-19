@@ -1,0 +1,68 @@
+{
+  "name": "clayver",
+  "version": "0.1.0",
+  "description": "Set up Clayver in-app customer support in your own Firebase project: `npx clayver init`.",
+  "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/clayver/clayver.git",
+    "directory": "packages/setup"
+  },
+  "homepage": "https://github.com/clayver/clayver/tree/main/packages/setup#readme",
+  "bugs": "https://github.com/clayver/clayver/issues",
+  "type": "module",
+  "bin": {
+    "clayver": "dist/cli.js"
+  },
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist",
+    "assets",
+    "README.md"
+  ],
+  "engines": {
+    "node": ">=20.17"
+  },
+  "scripts": {
+    "prepare-assets": "node scripts/prepare-assets.mjs",
+    "build": "node scripts/prepare-assets.mjs && tsc -p tsconfig.build.json && node scripts/chmod-bin.mjs",
+    "build:cli": "tsc -p tsconfig.build.json && node scripts/chmod-bin.mjs",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "lint": "eslint .",
+    "test": "vitest run",
+    "prepack": "node scripts/prepare-assets.mjs --strict && tsc -p tsconfig.build.json && node scripts/chmod-bin.mjs"
+  },
+  "keywords": [
+    "clayver",
+    "firebase",
+    "customer-support",
+    "chat",
+    "cli"
+  ],
+  "dependencies": {
+    "@inquirer/prompts": "^8.7.3",
+    "commander": "^14.0.3",
+    "diff": "^9.0.0",
+    "firebase-admin": "^13.10.0",
+    "jsonc-parser": "^3.3.1",
+    "picocolors": "^1.1.1",
+    "yaml": "^2.9.1"
+  },
+  "devDependencies": {
+    "@clayver/dashboard": "workspace:*",
+    "@clayver/functions": "workspace:*",
+    "@eslint/js": "^9.39.5",
+    "@types/node": "^20.19.43",
+    "eslint": "^9.39.5",
+    "typescript": "^5.9.3",
+    "typescript-eslint": "^8.71.2",
+    "vitest": "^3.2.7"
+  }
+}

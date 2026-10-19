@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <uses-permission android:name="android.permission.INTERNET" />
+    <!-- Needed on API 33+ to show Clayver pushes; the host app requests it at runtime. -->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+
+    <application>
+        <activity
+            android:name="com.clayver.sdk.ClayverChatActivity"
+            android:exported="false"
+            android:label="@string/clayver_chat_title"
+            android:launchMode="singleTop"
+            android:theme="@style/Clayver.Theme.Chat"
+            android:windowSoftInputMode="adjustResize" />
+
+        <!-- Agent mode: support staff answering from the app (Clayver.openAgentInbox). -->
+        <activity
+            android:name="com.clayver.sdk.ClayverAgentInboxActivity"
+            android:exported="false"
+            android:label="@string/clayver_agent_inbox_title"
+            android:launchMode="singleTop"
+            android:theme="@style/Clayver.Theme.Chat"
+            android:windowSoftInputMode="adjustResize" />
+
+        <!-- Backports the Photo Picker to API 19-29 through Google Play services. -->
+        <service
+            android:name="com.google.android.gms.metadata.ModuleDependencies"
+            android:enabled="false"
+            android:exported="false"
+            tools:ignore="MissingClass">
+            <intent-filter>
+                <action android:name="com.google.android.gms.metadata.MODULE_DEPENDENCIES" />
+            </intent-filter>
+            <meta-data android:name="photopicker_activity:0:required" android:value="" />
+        </service>
+    </application>
+</manifest>

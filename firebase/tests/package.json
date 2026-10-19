@@ -1,0 +1,22 @@
+{
+  "name": "@clayver/firebase-tests",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Firebase Emulator Suite tests for Clayver's rules and Cloud Functions.",
+  "scripts": {
+    "test": "pnpm --filter @clayver/functions build && firebase emulators:exec --config ../firebase.json --project demo-clayver --only auth,database,storage,functions \"vitest run\"",
+    "test:watch": "vitest",
+    "typecheck": "tsc -p tsconfig.json",
+    "emulators": "pnpm --filter @clayver/functions build && firebase emulators:exec --config ../firebase.json --project demo-clayver --only auth,database,storage,functions \"node ../scripts/load-emulator-rules.mjs && node -e \\\"setInterval(() => {}, 1 << 30)\\\"\""
+  },
+  "devDependencies": {
+    "@firebase/rules-unit-testing": "^4.0.1",
+    "@types/node": "^22.20.5",
+    "firebase": "^12.19.0",
+    "firebase-admin": "^14.5.0",
+    "firebase-tools": "^14.27.0",
+    "typescript": "^5.9.3",
+    "vitest": "^3.2.7"
+  }
+}

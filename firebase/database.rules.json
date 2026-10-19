@@ -1,0 +1,485 @@
+{
+  "rules": {
+    ".read": false,
+    ".write": false,
+    "clayver": {
+      "projects": {
+        "$p": {
+          ".validate": "$p.matches(/^[a-z0-9-]{1,40}$/)",
+          "conversations": {
+            ".read": "(auth != null && root.child('clayver/projects/' + $p + '/agents/' + auth.uid).child('active').val() === true)",
+            ".indexOn": [
+              "statusOrder",
+              "updatedAt",
+              "customerId",
+              "assigneeUid"
+            ],
+            "$c": {
+              ".read": "(auth != null && root.child('clayver/projects/' + $p + '/agents/' + auth.uid).child('active').val() === true) || (auth != null && auth.uid === data.child('customerId').val())",
+              ".write": "!data.exists() && newData.exists() && (auth != null && auth.uid === newData.child('customerId').val()) && !(root.child('clayver/projects/' + $p + '/moderation/' + newData.child('customerId').val()).child('blocked').val() === true && (root.child('clayver/projects/' + $p + '/moderation/' + newData.child('customerId').val()).child('until').val() == null || root.child('clayver/projects/' + $p + '/moderation/' + newData.child('customerId').val()).child('until').val() > now))",
+              ".validate": "newData.hasChildren(['customerId', 'status', 'createdAt']) && (data.exists() || newData.child('status').val() === 'open')",
+              "customerId": {
+                ".validate": "newData.isString() && (!data.exists() || data.val() === newData.val())"
+              },
+              "status": {
+                ".write": "(auth != null && root.child('clayver/projects/' + $p + '/agents/' + auth.uid).child('active').val() === true) && data.exists()",
+                ".validate": "newData.val() === 'open' || newData.val() === 'closed'"
+              },
+              "assigneeUid": {
+                ".write": "(auth != null && root.child('clayver/projects/' + $p + '/agents/' + auth.uid).child('active').val() === true) && data.parent().exists()",
+                ".validate": "(auth != null && root.child('clayver/projects/' + $p + '/agents/' + auth.uid).child('active').val() === true) && newData.isString() && root.child('clayver/projects/' + $p + '/agents/' + newData.val() + '/active').val() === true"
+              },
+              "createdAt": {
+                ".validate": "newData.val() === now"
+              },
+              "updatedAt": {
+                ".validate": false
+              },
+              "lastMessage": {
+                ".validate": false
+              },
+              "unread": {
+                ".validate": false
+              },
+              "statusOrder": {
+                ".validate": false
+              },
+              "closedAt": {
+                ".validate": false
+              },
+              "rev": {
+                ".validate": false
+              },
+              "unreadBasis": {
+                ".validate": false
+              },
+              "$other": {
+                ".validate": false
+              }
+            }
+          },
+          "messages": {
+            "$c": {
+              ".read": "(auth != null && root.child('clayver/projects/' + $p + '/agents/' + auth.uid).child('active').val() === true) || (auth != null && auth.uid === root.child('clayver/projects/' + $p + '/conversations/' + $c + '/customerId').val())",
+              ".indexOn": [
+                "createdAt"
+              ],
+              "$m": {
+                ".write": "!data.exists() && newData.exists() && root.child('clayver/projects/' + $p + '/conversations/' + $c + '/customerId').val() != null && ((newData.child('senderType').val() === 'customer' && (auth != null && auth.uid === root.child('clayver/projects/' + $p + '/conversations/' + $c + '/customerId').val()) && newData.child('senderId').val() === root.child('clayver/projects/' + $p + '/conversations/' + $c + '/customerId').val() && !(root.child('clayver/projects/' + $p + '/moderation/' + root.child('clayver/projects/' + $p + '/conversations/' + $c + '/customerId').val()).child('blocked').val() === true && (root.child('clayver/projects/' + $p + '/moderation/' + root.child('clayver/projects/' + $p + '/conversations/' + $c + '/customerId').val()).child('until').val() == null || root.child('clayver/projects/' + $p + '/moderation/' + root.child('clayver/projects/' + $p + '/conversations/' + $c + '/customerId').val()).child('until').val() > now))) || (newData.child('senderType').val() === 'agent' && (auth != null && root.child('clayver/projects/' + $p + '/agents/' + auth.uid).child('active').val() === true) && newData.child('senderId').val() === auth.uid))",
+                ".validate": "newData.hasChildren(['senderId', 'senderType', 'createdAt']) && (newData.hasChild('text') || newData.hasChild('attachment'))",
+                "senderId": {
+                  ".validate": "newData.isString()"
+                },
+                "senderType": {
+                  ".validate": "newData.val() === 'customer' || newData.val() === 'agent'"
+                },
+                "senderName": {
+                  ".validate": "newData.parent().child('senderType').val() === 'agent' && newData.isString() && newData.val().length >= 1 && newData.val().length <= 80"
+                },
+                "text": {
+                  ".validate": "newData.isString() && newData.val().length >= 1 && newData.val().length <= 4000"
+                },
+                "createdAt": {
+                  ".validate": "newData.val() === now"
+                },
+                "clientMessageId": {
+                  ".validate": "newData.isString() && newData.val().length >= 1 && newData.val().length <= 64"
+                },
+                "attachment": {
+                  ".validate": "newData.hasChildren(['storagePath', 'fileName', 'contentType', 'size'])",
+                  "storagePath": {
+                    ".validate": "newData.isString() && newData.val().length <= 600 && newData.val().beginsWith('clayver/projects/' + $p + '/customers/' + root.child('clayver/projects/' + $p + '/conversations/' + $c + '/customerId').val() + '/conversations/' + $c + '/')"
+                  },
+                  "fileName": {
+                    ".validate": "newData.isString() && newData.val().length >= 1 && newData.val().length <= 200"
+                  },
+                  "contentType": {
+                    ".validate": "newData.isString() && newData.val().matches(/^image\\/(jpeg|png|gif|webp|heic)$/)"
+                  },
+                  "size": {
+                    ".validate": "newData.isNumber() && newData.val() > 0 && newData.val() <= 307200"
+                  },
+                  "width": {
+                    ".validate": "newData.isNumber() && newData.val() > 0"
+                  },
+                  "height": {
+                    ".validate": "newData.isNumber() && newData.val() > 0"
+                  },
+                  "$other": {
+                    ".validate": false
+                  }
+                },
+                "$other": {
+                  ".validate": false
+                }
+              }
+            }
+          },
+          "reads": {
+            "$c": {
+              ".read": "(auth != null && root.child('clayver/projects/' + $p + '/agents/' + auth.uid).child('active').val() === true) || (auth != null && auth.uid === root.child('clayver/projects/' + $p + '/conversations/' + $c + '/customerId').val())",
+              "customer": {
+                ".write": "root.child('clayver/projects/' + $p + '/conversations/' + $c + '/customerId').val() != null && (auth != null && auth.uid === root.child('clayver/projects/' + $p + '/conversations/' + $c + '/customerId').val())",
+                ".validate": "newData.hasChildren(['lastReadAt'])",
+                "lastReadAt": {
+                  ".validate": "newData.isNumber() && newData.val() <= now && (!data.exists() || newData.val() >= data.val())"
+                },
+                "$other": {
+                  ".validate": false
+                }
+              },
+              "agent": {
+                ".write": "root.child('clayver/projects/' + $p + '/conversations/' + $c + '/customerId').val() != null && (auth != null && root.child('clayver/projects/' + $p + '/agents/' + auth.uid).child('active').val() === true)",
+                ".validate": "newData.hasChildren(['lastReadAt', 'uid'])",
+                "lastReadAt": {
+                  ".validate": "newData.isNumber() && newData.val() <= now && (!data.exists() || newData.val() >= data.val())"
+                },
+                "uid": {
+                  ".validate": "newData.val() === auth.uid"
+                },
+                "$other": {
+                  ".validate": false
+                }
+              },
+              "$other": {
+                ".validate": false
+              }
+            }
+          },
+          "inbox": {
+            "$cid": {
+              ".read": "(auth != null && auth.uid === $cid)"
+            }
+          },
+          "users": {
+            "$cid": {
+              ".read": "(auth != null && root.child('clayver/projects/' + $p + '/agents/' + auth.uid).child('active').val() === true) || (auth != null && auth.uid === $cid)",
+              "properties": {
+                ".write": "(auth != null && auth.uid === $cid)",
+                "$key": {
+                  ".validate": "($key.matches(/^[A-Za-z0-9][A-Za-z0-9_-]{0,63}$/) && ((newData.isString() && newData.val().length <= 1000) || newData.isNumber() || newData.isBoolean())) || (($key === '_name' || $key === '_email' || $key === '_uid') && newData.isString() && newData.val().length <= 1000)"
+                }
+              },
+              "lastSeenAt": {
+                ".write": "(auth != null && auth.uid === $cid)",
+                ".validate": "newData.val() === now"
+              },
+              "notifications": {
+                ".write": "(auth != null && auth.uid === $cid)",
+                "enabled": {
+                  ".validate": "newData.isBoolean()"
+                },
+                "$other": {
+                  ".validate": false
+                }
+              },
+              "account": {
+                ".validate": false
+              },
+              "createdAt": {
+                ".validate": false
+              },
+              "$other": {
+                ".validate": false
+              }
+            }
+          },
+          "agents": {
+            ".read": "(auth != null && root.child('clayver/projects/' + $p + '/agents/' + auth.uid).child('active').val() === true)",
+            "$uid": {
+              ".read": "auth != null && auth.uid === $uid",
+              "displayName": {
+                ".write": "auth != null && auth.uid === $uid && (auth != null && root.child('clayver/projects/' + $p + '/agents/' + auth.uid).child('active').val() === true)",
+                ".validate": "newData.isString() && newData.val().length >= 1 && newData.val().length <= 80"
+              }
+            }
+          },
+          "agentSettings": {
+            "$uid": {
+              ".read": "auth != null && auth.uid === $uid",
+              ".write": "auth != null && auth.uid === $uid && (auth != null && root.child('clayver/projects/' + $p + '/agents/' + auth.uid).child('active').val() === true)",
+              "notifications": {
+                "push": {
+                  ".validate": "newData.isBoolean()"
+                },
+                "$other": {
+                  ".validate": false
+                }
+              },
+              "$other": {
+                ".validate": false
+              }
+            }
+          },
+          "devices": {
+            "customers": {
+              "$cid": {
+                ".read": "(auth != null && auth.uid === $cid)",
+                ".write": "(auth != null && auth.uid === $cid)",
+                "$deviceId": {
+                  ".validate": "$deviceId.matches(/^[A-Za-z0-9_-]{8,64}$/) && newData.hasChildren(['uid', 'platform', 'pushToken', 'active', 'updatedAt'])",
+                  "uid": {
+                    ".validate": "newData.val() === auth.uid"
+                  },
+                  "platform": {
+                    ".validate": "newData.val() === 'ios' || newData.val() === 'android'"
+                  },
+                  "pushToken": {
+                    ".validate": "newData.isString() && newData.val().length >= 1 && newData.val().length <= 4096"
+                  },
+                  "active": {
+                    ".validate": "newData.isBoolean()"
+                  },
+                  "updatedAt": {
+                    ".validate": "newData.val() === now"
+                  },
+                  "appVersion": {
+                    ".validate": "newData.isString() && newData.val().length >= 0 && newData.val().length <= 64"
+                  },
+                  "sdkVersion": {
+                    ".validate": "newData.isString() && newData.val().length >= 0 && newData.val().length <= 64"
+                  },
+                  "locale": {
+                    ".validate": "newData.isString() && newData.val().length >= 0 && newData.val().length <= 64"
+                  },
+                  "$other": {
+                    ".validate": false
+                  }
+                }
+              }
+            },
+            "agents": {
+              "$uid": {
+                ".read": "auth != null && auth.uid === $uid",
+                ".write": "auth != null && auth.uid === $uid && ((auth != null && root.child('clayver/projects/' + $p + '/agents/' + auth.uid).child('active').val() === true) || !newData.exists())",
+                "$deviceId": {
+                  ".validate": "$deviceId.matches(/^[A-Za-z0-9_-]{8,64}$/) && newData.hasChildren(['uid', 'platform', 'pushToken', 'active', 'updatedAt'])",
+                  "uid": {
+                    ".validate": "newData.val() === auth.uid"
+                  },
+                  "platform": {
+                    ".validate": "newData.val() === 'web' || newData.val() === 'ios' || newData.val() === 'android'"
+                  },
+                  "pushToken": {
+                    ".validate": "newData.isString() && newData.val().length >= 1 && newData.val().length <= 4096"
+                  },
+                  "active": {
+                    ".validate": "newData.isBoolean()"
+                  },
+                  "updatedAt": {
+                    ".validate": "newData.val() === now"
+                  },
+                  "appVersion": {
+                    ".validate": "newData.isString() && newData.val().length >= 0 && newData.val().length <= 64"
+                  },
+                  "sdkVersion": {
+                    ".validate": "newData.isString() && newData.val().length >= 0 && newData.val().length <= 64"
+                  },
+                  "locale": {
+                    ".validate": "newData.isString() && newData.val().length >= 0 && newData.val().length <= 64"
+                  },
+                  "$other": {
+                    ".validate": false
+                  }
+                }
+              }
+            }
+          },
+          "moderation": {
+            ".read": "(auth != null && root.child('clayver/projects/' + $p + '/agents/' + auth.uid).child('active').val() === true)",
+            "$cid": {
+              ".read": "(auth != null && auth.uid === $cid)",
+              ".write": "(auth != null && root.child('clayver/projects/' + $p + '/agents/' + auth.uid).child('active').val() === true)",
+              ".validate": "newData.hasChildren(['blocked', 'reason', 'by', 'at'])",
+              "blocked": {
+                ".validate": "newData.val() === true"
+              },
+              "reason": {
+                ".validate": "newData.val() === 'spam' || newData.val() === 'abuse' || newData.val() === 'other'"
+              },
+              "until": {
+                ".validate": "newData.isNumber() && newData.val() > now"
+              },
+              "by": {
+                ".validate": "newData.val() === auth.uid"
+              },
+              "at": {
+                ".validate": "newData.val() === now"
+              },
+              "$other": {
+                ".validate": false
+              }
+            }
+          },
+          "tags": {
+            ".read": "(auth != null && root.child('clayver/projects/' + $p + '/agents/' + auth.uid).child('active').val() === true)",
+            "$tag": {
+              ".write": "(auth != null && root.child('clayver/projects/' + $p + '/agents/' + auth.uid).child('active').val() === true) && (newData.exists() || ((auth != null && root.child('clayver/projects/' + $p + '/agents/' + auth.uid).child('active').val() === true) && root.child('clayver/projects/' + $p + '/agents/' + auth.uid).child('role').val() === 'admin'))",
+              ".validate": "$tag.matches(/^[a-z0-9][a-z0-9-]{0,39}$/) && newData.hasChildren(['name', 'color', 'createdAt', 'createdBy'])",
+              "name": {
+                ".validate": "newData.isString() && newData.val().length >= 1 && newData.val().length <= 40"
+              },
+              "color": {
+                ".validate": "newData.isString() && newData.val().matches(/^#[0-9a-fA-F]{6}$/)"
+              },
+              "createdAt": {
+                ".validate": "(!data.exists() && newData.val() === now) || newData.val() === data.val()"
+              },
+              "createdBy": {
+                ".validate": "(!data.exists() && newData.val() === auth.uid) || newData.val() === data.val()"
+              },
+              "$other": {
+                ".validate": false
+              }
+            }
+          },
+          "conversationTags": {
+            ".read": "(auth != null && root.child('clayver/projects/' + $p + '/agents/' + auth.uid).child('active').val() === true)",
+            "$c": {
+              "$tag": {
+                ".write": "(auth != null && root.child('clayver/projects/' + $p + '/agents/' + auth.uid).child('active').val() === true) && (!newData.exists() || (root.child('clayver/projects/' + $p + '/tags/' + $tag).exists() && root.child('clayver/projects/' + $p + '/conversations/' + $c + '/customerId').val() != null))",
+                ".validate": "newData.val() === true"
+              }
+            }
+          },
+          "triage": {
+            ".read": "(auth != null && root.child('clayver/projects/' + $p + '/agents/' + auth.uid).child('active').val() === true)",
+            "$c": {
+              ".write": "(auth != null && root.child('clayver/projects/' + $p + '/agents/' + auth.uid).child('active').val() === true) && (!newData.exists() || root.child('clayver/projects/' + $p + '/conversations/' + $c + '/customerId').val() != null)",
+              "priority": {
+                ".validate": "newData.isString() && (root.child('clayver/projects/' + $p + '/triageOptions/priority').child(newData.val()).exists() || (!root.child('clayver/projects/' + $p + '/triageOptions/priority').exists() && (newData.val() === 'high' || newData.val() === 'medium' || newData.val() === 'low')))"
+              },
+              "stage": {
+                ".validate": "newData.isString() && (root.child('clayver/projects/' + $p + '/triageOptions/stage').child(newData.val()).exists() || (!root.child('clayver/projects/' + $p + '/triageOptions/stage').exists() && (newData.val() === 'todo' || newData.val() === 'in_progress' || newData.val() === 'on_hold')))"
+              },
+              "$other": {
+                ".validate": false
+              }
+            }
+          },
+          "triageOptions": {
+            ".read": "(auth != null && root.child('clayver/projects/' + $p + '/agents/' + auth.uid).child('active').val() === true)",
+            "$kind": {
+              ".write": "(auth != null && root.child('clayver/projects/' + $p + '/agents/' + auth.uid).child('active').val() === true)",
+              ".validate": "$kind === 'priority' || $kind === 'stage'",
+              "$option": {
+                ".validate": "$option.matches(/^[a-z0-9][a-z0-9_-]{0,39}$/) && newData.hasChildren(['name', 'color', 'order'])",
+                "name": {
+                  ".validate": "newData.isString() && newData.val().length >= 1 && newData.val().length <= 40"
+                },
+                "color": {
+                  ".validate": "newData.isString() && newData.val().matches(/^#[0-9a-fA-F]{6}$/)"
+                },
+                "order": {
+                  ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() < 100"
+                },
+                "$other": {
+                  ".validate": false
+                }
+              }
+            }
+          },
+          "tagIndex": {
+            ".read": "(auth != null && root.child('clayver/projects/' + $p + '/agents/' + auth.uid).child('active').val() === true)",
+            "$tag": {
+              ".indexOn": [
+                ".value"
+              ]
+            }
+          },
+          "notes": {
+            ".read": "(auth != null && root.child('clayver/projects/' + $p + '/agents/' + auth.uid).child('active').val() === true)",
+            "$c": {
+              "$n": {
+                ".write": "(auth != null && root.child('clayver/projects/' + $p + '/agents/' + auth.uid).child('active').val() === true) && ((!data.exists() && newData.exists() && root.child('clayver/projects/' + $p + '/conversations/' + $c + '/customerId').val() != null) || (data.exists() && !newData.exists() && (data.child('authorUid').val() === auth.uid || ((auth != null && root.child('clayver/projects/' + $p + '/agents/' + auth.uid).child('active').val() === true) && root.child('clayver/projects/' + $p + '/agents/' + auth.uid).child('role').val() === 'admin'))))",
+                ".validate": "newData.hasChildren(['authorUid', 'text', 'createdAt'])",
+                "authorUid": {
+                  ".validate": "newData.val() === auth.uid"
+                },
+                "authorName": {
+                  ".validate": "newData.isString() && newData.val().length >= 1 && newData.val().length <= 80"
+                },
+                "text": {
+                  ".validate": "newData.isString() && newData.val().length >= 1 && newData.val().length <= 4000"
+                },
+                "createdAt": {
+                  ".validate": "newData.val() === now"
+                },
+                "$other": {
+                  ".validate": false
+                }
+              }
+            }
+          },
+          "savedReplies": {
+            ".read": "(auth != null && root.child('clayver/projects/' + $p + '/agents/' + auth.uid).child('active').val() === true)",
+            "$r": {
+              ".write": "(auth != null && root.child('clayver/projects/' + $p + '/agents/' + auth.uid).child('active').val() === true) && (newData.exists() || data.child('createdBy').val() === auth.uid || ((auth != null && root.child('clayver/projects/' + $p + '/agents/' + auth.uid).child('active').val() === true) && root.child('clayver/projects/' + $p + '/agents/' + auth.uid).child('role').val() === 'admin'))",
+              ".validate": "newData.hasChildren(['title', 'text', 'createdBy', 'createdAt', 'updatedAt'])",
+              "title": {
+                ".validate": "newData.isString() && newData.val().length >= 1 && newData.val().length <= 80"
+              },
+              "text": {
+                ".validate": "newData.isString() && newData.val().length >= 1 && newData.val().length <= 4000"
+              },
+              "createdBy": {
+                ".validate": "(!data.exists() && newData.val() === auth.uid) || newData.val() === data.val()"
+              },
+              "createdAt": {
+                ".validate": "(!data.exists() && newData.val() === now) || newData.val() === data.val()"
+              },
+              "updatedAt": {
+                ".validate": "newData.val() === now"
+              },
+              "$other": {
+                ".validate": false
+              }
+            }
+          },
+          "config": {
+            "public": {
+              ".read": "auth != null",
+              ".write": "((auth != null && root.child('clayver/projects/' + $p + '/agents/' + auth.uid).child('active').val() === true) && root.child('clayver/projects/' + $p + '/agents/' + auth.uid).child('role').val() === 'admin')",
+              "teamName": {
+                ".validate": "newData.isString() && newData.val().length >= 1 && newData.val().length <= 80"
+              },
+              "welcomeMessage": {
+                ".validate": "newData.isString() && newData.val().length >= 1 && newData.val().length <= 1000"
+              },
+              "accentColor": {
+                ".validate": "newData.isString() && newData.val().matches(/^#[0-9a-fA-F]{6}$/)"
+              },
+              "$other": {
+                ".validate": false
+              }
+            },
+            "private": {
+              ".read": "(auth != null && root.child('clayver/projects/' + $p + '/agents/' + auth.uid).child('active').val() === true)",
+              ".write": "((auth != null && root.child('clayver/projects/' + $p + '/agents/' + auth.uid).child('active').val() === true) && root.child('clayver/projects/' + $p + '/agents/' + auth.uid).child('role').val() === 'admin')",
+              "notifyAgents": {
+                ".validate": "newData.val() === 'all' || newData.val() === 'assignee_or_all'"
+              },
+              "rateLimits": {
+                "messagesPerMinute": {
+                  ".validate": "newData.isNumber() && newData.val() >= 1 && newData.val() <= 1000"
+                },
+                "conversationsPerHour": {
+                  ".validate": "newData.isNumber() && newData.val() >= 1 && newData.val() <= 1000"
+                },
+                "$other": {
+                  ".validate": false
+                }
+              },
+              "$other": {
+                ".validate": false
+              }
+            },
+            "$other": {
+              ".validate": false
+            }
+          }
+        }
+      }
+    }
+  }
+}

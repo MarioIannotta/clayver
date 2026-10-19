@@ -1,0 +1,11 @@
+# Used by BuildKit for `docker build -f dashboard/Dockerfile .`
+**/node_modules
+**/dist
+**/.turbo
+.git
+android
+ios
+flutter
+examples
+**/.env
+**/.env.local

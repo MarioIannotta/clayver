@@ -1,0 +1,43 @@
+rules_version = '2';
+
+// Clayver attachment rules. Storage rules cannot read the Realtime Database,
+// so agent access is checked through the `clayver_roles` custom claim that
+// clayverSetAgentRole keeps in sync with clayver/projects/{p}/agents/{uid}.
+service firebase.storage {
+  match /b/{bucket}/o {
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    // Same identity rule as the database: the customer id is the Firebase Auth uid.
+    function isCustomer(cid) {
+      return signedIn() && request.auth.uid == cid;
+    }
+
+    function isAgent(projectId) {
+      return signedIn()
+        && request.auth.token.get('clayver_roles', {}).get(projectId, '') in ['agent', 'admin'];
+    }
+
+    function isAllowedAttachment(fileName, attachmentId) {
+      return request.resource.size > 0
+        // Photos only, compressed by the SDKs to at most 300 KB.
+        && request.resource.size <= 300 * 1024
+        && request.resource.contentType.matches('image/(jpeg|png|gif|webp|heic)')
+        && fileName.size() <= 200
+        && attachmentId.matches('[A-Za-z0-9_-]{1,64}');
+    }
+
+    match /clayver/projects/{projectId}/customers/{customerId}/conversations/{conversationId}/{attachmentId}/{fileName} {
+      allow read: if isCustomer(customerId) || isAgent(projectId);
+      allow create: if resource == null
+        && (isCustomer(customerId) || isAgent(projectId))
+        && isAllowedAttachment(fileName, attachmentId);
+      // Attachments are immutable; removal is an administrative task.
+      allow update, delete: if false;
+    }
+
+    // Everything else in the bucket is left to the host app's own rules.
+    // When merging into an existing storage.rules, keep only the match block above.
+  }
+}

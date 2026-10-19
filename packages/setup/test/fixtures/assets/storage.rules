@@ -1,0 +1,23 @@
+rules_version = '2';
+
+// Clayver attachment rules (test fixture).
+service firebase.storage {
+  match /b/{bucket}/o {
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    function isAgent(projectId) {
+      return signedIn()
+        && request.auth.token.get('clayver_roles', {}).get(projectId, '') in ['agent', 'admin'];
+    }
+
+    match /clayver/projects/{projectId}/customers/{customerId}/conversations/{conversationId}/{attachmentId}/{fileName} {
+      allow read: if request.auth.uid == customerId || isAgent(projectId);
+      allow update, delete: if false;
+    }
+
+    // Everything else in the bucket is left to the host app's own rules.
+    // When merging into an existing storage.rules, keep only the match block above.
+  }
+}

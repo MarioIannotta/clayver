@@ -1,0 +1,15 @@
+{
+  "hosting": {
+    "public": "web",
+    "ignore": ["firebase.json"]
+  },
+  "functions": {
+    "source": "functions"
+  },
+  "database": {
+    "rules": "database.rules.json"
+  },
+  "storage": {
+    "rules": "storage.rules"
+  }
+}

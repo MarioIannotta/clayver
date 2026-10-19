@@ -1,0 +1,11 @@
+{
+  "project_info": {
+    "project_number": "123456789",
+    "firebase_url": "https://shop-prod-default-rtdb.firebaseio.com",
+    "project_id": "shop-prod",
+    "storage_bucket": "shop-prod.appspot.com"
+  },
+  "client": [
+    { "client_info": { "mobilesdk_app_id": "1:123456789:android:abc", "android_client_info": { "package_name": "com.example.shop" } } }
+  ]
+}

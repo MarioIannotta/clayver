@@ -1,0 +1,41 @@
+node_modules/
+dist/
+firebase/functions/lib/
+.turbo/
+*.log
+.DS_Store
+# Firebase
+.firebase/
+firebase-debug.log*
+database-debug.log*
+firestore-debug.log*
+ui-debug.log*
+pubsub-debug.log*
+.secret.local
+.runtimeconfig.json
+# iOS
+.build/
+DerivedData/
+*.xcuserstate
+xcuserdata/
+Pods/
+# Android
+.gradle/
+build/
+local.properties
+*.iml
+.idea/
+# Flutter
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.packages
+pubspec.lock
+!examples/flutter/pubspec.lock
+# Env
+.env
+.env.local
+# pnpm demo:setup (your own Firebase project)
+/.clayver/
+/firebase/functions/.env.*
+!/firebase/functions/.env.demo-clayver

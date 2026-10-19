@@ -1,0 +1,12 @@
+{
+  // The shop's own rules: must survive Clayver's merge untouched.
+  "rules": {
+    "orders": {
+      "$uid": {
+        ".read": "auth != null && auth.uid === $uid",
+        ".write": "auth != null && auth.uid === $uid"
+      }
+    },
+    "catalog": { ".read": true }
+  }
+}

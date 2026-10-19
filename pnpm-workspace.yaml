@@ -1,0 +1,12 @@
+packages:
+  - "packages/*"
+  - "dashboard"
+  - "firebase/functions"
+  - "firebase/tests"
+
+# @firebase/database imports @firebase/app without declaring it; without this
+# pnpm can resolve two copies and getDatabase() fails ("Service database is not available").
+packageExtensions:
+  "@firebase/database":
+    peerDependencies:
+      "@firebase/app": "*"

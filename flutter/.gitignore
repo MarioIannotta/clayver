@@ -1,0 +1,5 @@
+# The repository root ignores `lib/` (TypeScript build output); the Dart
+# sources of this package must be tracked.
+!lib/
+.dart_tool/
+build/

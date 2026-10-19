@@ -1,0 +1,12 @@
+apply plugin: 'com.android.application'
+
+android {
+    namespace 'com.example.bare'
+    defaultConfig {
+        applicationId 'com.example.bare'
+    }
+}
+
+dependencies {
+    implementation 'androidx.core:core-ktx:1.13.1'
+}

@@ -1,0 +1,27 @@
+{
+  "name": "clayver-monorepo",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Open-source customer support for mobile apps, running in your own Firebase project.",
+  "license": "Apache-2.0",
+  "packageManager": "pnpm@10.28.0",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "build": "turbo run build",
+    "test": "turbo run test",
+    "lint": "turbo run lint",
+    "typecheck": "turbo run typecheck",
+    "test:emulators": "pnpm --filter @clayver/firebase-tests test",
+    "emulators": "pnpm --filter @clayver/firebase-tests emulators",
+    "cli:link": "turbo run build --filter=clayver && cd packages/setup && npm link",
+    "dev:setup": "pnpm --filter clayver build:cli && node packages/setup/dist/cli.js dev setup",
+    "dev:deploy": "pnpm --filter @clayver/functions rules:build && pnpm --filter clayver build:cli && node packages/setup/dist/cli.js dev deploy",
+    "dev:dashboard": "pnpm --filter clayver build:cli && node packages/setup/dist/cli.js dev dashboard"
+  },
+  "devDependencies": {
+    "turbo": "^2.5.0",
+    "typescript": "^5.6.0"
+  }
+}

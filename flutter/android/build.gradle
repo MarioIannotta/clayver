@@ -1,0 +1,68 @@
+// Android side of the Clayver Flutter plugin: a thin bridge over the native
+// Clayver Android SDK (`com.clayver:clayver-android`).
+//
+// Local development against an unpublished SDK: see "Using a local native SDK"
+// in ../README.md (Gradle composite build with `includeBuild`, or mavenLocal).
+
+group = "com.clayver.flutter"
+version = "0.1.0"
+
+buildscript {
+    ext.kotlin_version = "2.1.21"
+    repositories {
+        google()
+        mavenCentral()
+    }
+    dependencies {
+        classpath("com.android.tools.build:gradle:8.7.3")
+        classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version")
+    }
+}
+
+rootProject.allprojects {
+    repositories {
+        google()
+        mavenCentral()
+    }
+}
+
+apply plugin: "com.android.library"
+
+// AGP 9 compiles Kotlin itself ("built-in Kotlin"); older AGP needs the
+// Kotlin Gradle plugin applied explicitly.
+def agpMajor = com.android.Version.ANDROID_GRADLE_PLUGIN_VERSION.tokenize(".")[0].toInteger()
+if (agpMajor < 9) {
+    apply plugin: "kotlin-android"
+}
+
+android {
+    namespace = "com.clayver.flutter"
+    compileSdk = 35
+
+    defaultConfig {
+        // Matches the native SDK.
+        minSdk = 23
+    }
+
+    compileOptions {
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
+    }
+
+    sourceSets {
+        main.java.srcDirs += "src/main/kotlin"
+    }
+}
+
+tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).configureEach {
+    compilerOptions {
+        jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17)
+    }
+}
+
+def clayverAndroidVersion = project.findProperty("clayver.androidSdkVersion") ?: "0.1.0"
+
+dependencies {
+    implementation("com.clayver:clayver-android:$clayverAndroidVersion")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.9.0")
+}

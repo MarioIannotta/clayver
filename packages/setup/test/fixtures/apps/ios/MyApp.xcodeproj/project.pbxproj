@@ -1,0 +1,8 @@
+// !$*UTF8*$!
+{
+	objects = {
+		A1 /* Debug */ = { buildSettings = { PRODUCT_BUNDLE_IDENTIFIER = com.example.myapp; PRODUCT_NAME = "$(TARGET_NAME)"; }; };
+		A2 /* Release */ = { buildSettings = { PRODUCT_BUNDLE_IDENTIFIER = com.example.myapp; }; };
+		A3 /* Tests */ = { buildSettings = { PRODUCT_BUNDLE_IDENTIFIER = com.example.myappTests; }; };
+	};
+}

@@ -1,0 +1,9 @@
+{
+  "cliVersion": "0.1.0",
+  "generatedAt": "2026-01-01T00:00:00.000Z",
+  "functionsVersion": "0.1.0",
+  "functionNames": ["clayverSetAgentRole", "clayverOnMessageCreated"],
+  "dashboard": false,
+  "files": {},
+  "complete": true
+}
