@@ -13,8 +13,9 @@ let package = Package(
         .library(name: "clayver", targets: ["clayver"]),
     ],
     dependencies: [
-        // Local checkout of the native SDK (this monorepo's root package).
-        .package(name: "ClayverSDK", path: "../../.."),
+        // The native SDK is the repository root package. A relative path breaks
+        // once Flutter symlinks this plugin into the app's ephemeral folder.
+        .package(url: "https://github.com/MarioIannotta/clayver.git", revision: "6b457a863a0e70dc22133efa284f358afcfb2e91"),
         // Same Firebase iOS SDK version as firebase_core 4.15.0, so the app
         // resolves a single copy.
         .package(url: "https://github.com/firebase/firebase-ios-sdk", exact: "12.19.0"),
