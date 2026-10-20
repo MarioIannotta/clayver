@@ -1,0 +1,1 @@
+../../../../../../ios/Sources/ClayverSDK/Core/Paths.swift
