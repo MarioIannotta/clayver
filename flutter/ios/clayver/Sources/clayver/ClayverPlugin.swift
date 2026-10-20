@@ -1,0 +1,1 @@
+../../../Classes/ClayverPlugin.swift
