@@ -57,8 +57,9 @@ What it does, in order:
    `GoogleService-Info.plist` or `lib/firebase_options.dart`, and lets you pick another one or
    create a new one. If the app is not registered yet, it runs `firebase apps:create` and writes
    the config from `firebase apps:sdkconfig`. For Flutter it offers `flutterfire configure`.
-4. **Backend.** Writes or merges `firebase.json`, merges the rules, copies the functions, writes
-   their parameters and runs
+4. **Backend.** Writes or merges `firebase.json`, merges the rules, writes a `clayver-functions/`
+   folder that depends on this package (the function source stays inside it), writes
+   its parameters and runs
    `firebase deploy --only database,storage,functions:clayver`. It shows a diff and asks before it
    changes any existing file.
 5. **Push.** Prints the APNs key upload link and the capabilities the app needs (Push
@@ -118,15 +119,16 @@ The project defaults to `firebase.projectId` in `clayver.config.json`. The resul
 ### `clayver status [--remote]`
 
 Shows what `clayver.json` recorded and whether each file is unchanged, edited or missing. It also
-says whether this CLI version bundles newer functions or rules. `--remote` also lists the deployed
+says whether `clayver-functions/` already depends on this CLI version. `--remote` also lists the deployed
 Clayver functions (`firebase functions:list`).
 
 ### `clayver update [--no-deploy] [--dry-run] [--yes]`
 
-Copies the rules and functions bundled with the **installed** CLI version into your project again,
-then redeploys. Run `npx clayver@latest update` to upgrade. Every change is shown as a diff and
-needs confirmation. With `--yes`, it replaces only files that Clayver wrote and nobody edited
-since. Functions files that the new version no longer ships are deleted.
+Merges the rules bundled with the **installed** CLI version and points `clayver-functions/`
+at that version of the `clayver` package, then redeploys. Run `npx clayver@latest update` to
+upgrade. Every change is shown as a diff and needs confirmation. With `--yes`, it replaces only
+files that Clayver wrote and nobody edited since. Function source an older CLI copied into the
+app is deleted.
 
 ### `clayver remove [--delete-functions] [--delete-data] [--dry-run] [--yes]`
 
@@ -171,7 +173,7 @@ link. `--dry-run` prints the writes without making them.
 | `firebase.json` | Created, or merged without changing your existing settings. It points `database.rules` and `storage.rules` at the rules files, and adds a `functions` codebase `{ "source": "clayver-functions", "codebase": "clayver" }` next to your own functions. |
 | `database.rules.json` | If you already have one, Clayver adds only the `rules.clayver` subtree. Your rules and comments are untouched. If a root `.read` or `.write` rule would cascade into `clayver/`, you get a warning. A `clayver` subtree that Clayver did not install, or that was edited, counts as a conflict and needs your confirmation. |
 | `storage.rules` | Clayver's attachment rules go in a block between `// >>> clayver` and `// <<< clayver` inside your `match /b/{bucket}/o`. Its helper functions are renamed to `clayver_*`, so they cannot clash with yours. |
-| `clayver-functions/` | The compiled Clayver Cloud Functions (`lib/`, `package.json`), copied from the CLI package. Deploy it as the `clayver` codebase. Do not edit it: `update` replaces it. |
+| `clayver-functions/` | A small package that depends on `clayver` and re-exports its Cloud Functions (`package.json`, `index.js`). Deploy it as the `clayver` codebase. The function source stays in the `clayver` package; `update` bumps the dependency. |
 | `clayver-functions/.env.<project>` | Function parameters: `CLAYVER_BOOTSTRAP_ADMINS`, `CLAYVER_FUNCTIONS_REGION` and `CLAYVER_DASHBOARD_URL`. None of them is secret. |
 | `clayver-functions/.gitignore` | Keeps `node_modules/` (from the `npm install` before deploy) out of git. |
 | `.firebaserc` | Created or completed with your default project. If a different default is already set, Clayver leaves it and passes `--project` explicitly. |

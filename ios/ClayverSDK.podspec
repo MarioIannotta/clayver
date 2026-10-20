@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
   s.name             = 'ClayverSDK'
-  s.version          = '0.1.0'
+  s.version          = '0.1.1'
   s.summary          = 'Open-source in-app customer support that runs in your own Firebase project.'
   s.description      = <<-DESC
     Clayver is an in-app customer support SDK (chat, push notifications, unread

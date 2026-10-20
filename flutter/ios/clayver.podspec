@@ -9,7 +9,7 @@
 #
 Pod::Spec.new do |s|
   s.name             = 'clayver'
-  s.version          = '0.1.0'
+  s.version          = '0.1.1'
   s.summary          = 'Flutter plugin for Clayver in-app customer support.'
   s.description      = <<-DESC
     Flutter wrapper over the Clayver iOS SDK: open-source in-app customer
@@ -22,7 +22,7 @@ Pod::Spec.new do |s|
   s.source_files     = 'Classes/**/*.swift'
 
   s.dependency 'Flutter'
-  s.dependency 'ClayverSDK', '~> 0.1.0'
+  s.dependency 'ClayverSDK', '~> 0.1.1'
   s.dependency 'FirebaseCore'
 
   s.platform         = :ios, '15.0'

@@ -24,7 +24,7 @@ database rules).
 
 ```yaml
 dependencies:
-  clayver: ^0.1.0
+  clayver: ^0.1.1
   firebase_core: ^5.0.0
   firebase_messaging: ^17.0.0 # for push notifications
 ```

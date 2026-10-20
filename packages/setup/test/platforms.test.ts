@@ -28,7 +28,7 @@ describe("init per platform", () => {
     const dir = copyFixture("flutter");
     const deps = makeDeps({ cwd: dir, prompter: new ScriptedPrompter([], true) });
     await runInit({ project: "shop-prod", admins: "admin@example.com", skipBackend: true, skipPush: true }, deps);
-    expect(readFileSync(join(dir, "pubspec.yaml"), "utf8")).toContain("dependencies:\n  clayver: ^0.1.0\n  flutter:");
+    expect(readFileSync(join(dir, "pubspec.yaml"), "utf8")).toContain("dependencies:\n  clayver: ^0.1.1\n  flutter:");
     expect(deps.logger.text()).toContain("flutterfire configure --project=shop-prod");
   });
 

@@ -100,10 +100,11 @@ if (!existsSync(join(functionsSrc, "package.json"))) {
     name: "clayver-functions",
     version: fpkg.version ?? "0.0.0",
     private: true,
-    description: "Clayver Cloud Functions. Managed by the `clayver` CLI: `npx clayver update` replaces this folder.",
+    description: "Clayver Cloud Functions. Apps depend on the `clayver` package and re-export this entry; the source is not copied into the app.",
     license: fpkg.license ?? "Apache-2.0",
     main: fpkg.main ?? "lib/index.js",
-    ...(fpkg.type ? { type: fpkg.type } : {}),
+    // Keeps these .js files CommonJS when the published `clayver` package is `"type": "module"`.
+    type: "commonjs",
     engines: fpkg.engines ?? { node: "20" },
     dependencies: deps,
   };

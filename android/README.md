@@ -18,10 +18,10 @@ The module is `android/clayver` (package `com.clayver.sdk`, Maven coordinates
   // settings.gradle.kts
   includeBuild("path/to/clayver/android")
   // app/build.gradle.kts
-  dependencies { implementation("com.clayver:clayver-android:0.1.0") }
+  dependencies { implementation("com.clayver:clayver-android:0.1.1") }
   ```
 - **Maven local**: `cd android && ./gradlew :clayver:publishToMavenLocal`, add
-  `mavenLocal()` to your repositories, then depend on `com.clayver:clayver-android:0.1.0`.
+  `mavenLocal()` to your repositories, then depend on `com.clayver:clayver-android:0.1.1`.
 
 The SDK brings the Firebase BoM (auth, database, storage, functions, messaging),
 Compose Material 3 and Coil. Your app still needs the

@@ -1,4 +1,4 @@
-import { join, relative, sep } from "node:path";
+import { dirname, join, relative, sep } from "node:path";
 import { DASHBOARD_DIR, FUNCTIONS_CODEBASE, FUNCTIONS_DIR, LINKS } from "../constants.js";
 import type { Assets } from "../core/assets.js";
 import type { Ctx } from "../core/context.js";
@@ -37,8 +37,8 @@ export function envFilePath(firebaseDir: string, projectId: string) {
 }
 
 /**
- * Writes firebase.json, merges the database and storage rules, copies the
- * functions source and writes its parameters. Shared by `init` and `update`.
+ * Writes firebase.json, merges the database and storage rules, writes the
+ * thin functions folder and its parameters. Shared by `init` and `update`.
  */
 export async function writeBackendFiles(ctx: Ctx, files: FileOps, input: BackendInput): Promise<BackendFilesResult> {
   const { logger } = ctx;
@@ -128,6 +128,7 @@ export async function writeBackendFiles(ctx: Ctx, files: FileOps, input: Backend
     .map((r) => files.abs(r.path));
   const group = await files.writeGroup(`${files.rel(functionsDir)}/ (Clayver Cloud Functions)`, changes, stale);
   if (!group.applied) status = "partial";
+  else if (!files.dryRun) for (const abs of stale) files.pruneEmptyDirs(dirname(abs));
 
   // Function parameters
   const envPath = envFilePath(firebaseDir, projectId);

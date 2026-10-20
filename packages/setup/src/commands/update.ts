@@ -15,8 +15,8 @@ export interface UpdateOptions extends CommonOptions {
 }
 
 /**
- * Re-copies the rules and functions bundled with this CLI version into the
- * project (diff + confirmation for every change) and redeploys.
+ * Merges the rules bundled with this CLI version, points `clayver-functions/`
+ * at this version of the `clayver` package, and redeploys.
  */
 export async function runUpdate(opts: UpdateOptions, deps: Deps): Promise<ClayverManifest> {
   const ctx = makeCtx(opts, deps);

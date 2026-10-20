@@ -11,6 +11,16 @@ listed under **Changed** or **Removed** with upgrade notes.
 
 ## [Unreleased]
 
+## [0.1.1] - 2026-10-20
+
+### Changed
+
+- **Functions are a dependency, like the dashboard.** `npx clayver init` writes
+  `clayver-functions/package.json` and `index.js` that depend on the `clayver`
+  package and re-export `clayver/functions`. The compiled function source is
+  no longer copied into the app. `npx clayver update` bumps that dependency
+  and deletes source an older CLI copied.
+
 ### Added
 
 - **Special user property keys.** `Clayver.UserProperty.name`, `.email` and
@@ -150,5 +160,6 @@ First public version: the minimum viable product.
 - Example apps for iOS, Android and Flutter, and documentation of the data
   model, SDK API contract, security model, identity verification and push.
 
-[Unreleased]: https://github.com/clayver/clayver/compare/v0.1.0...HEAD
+[Unreleased]: https://github.com/clayver/clayver/compare/v0.1.1...HEAD
+[0.1.1]: https://github.com/clayver/clayver/compare/v0.1.0...v0.1.1
 [0.1.0]: https://github.com/clayver/clayver/releases/tag/v0.1.0

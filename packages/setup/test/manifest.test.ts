@@ -1,5 +1,4 @@
-import { cpSync, existsSync, mkdtempSync, readFileSync, writeFileSync } from "node:fs";
-import { tmpdir } from "node:os";
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import { runInit } from "../src/commands/init.js";
@@ -10,7 +9,7 @@ import { ClayverError } from "../src/core/errors.js";
 import { parseManifest, readManifest, serializeManifest, type ClayverManifest } from "../src/core/manifest.js";
 import { NonInteractivePrompter } from "../src/core/prompter.js";
 import { sha256 } from "../src/core/hash.js";
-import { ASSETS, copyFixture, makeDeps, ScriptedPrompter, snapshot } from "./helpers/index.js";
+import { copyFixture, makeDeps, ScriptedPrompter, snapshot } from "./helpers/index.js";
 
 /** Says yes to every confirmation (dependency edits included). */
 const yesToAll = (typed?: string) => new ScriptedPrompter([], true, typed);
@@ -53,9 +52,19 @@ describe("clayver.json", () => {
     expect(byPath["firebase.json"]?.action).toBe("modified");
     expect(byPath["database.rules.json"]?.reversal).toEqual({ type: "json-remove", paths: [["rules", "clayver"]] });
     expect(byPath["storage.rules"]?.reversal).toEqual({ type: "storage-rules-block" });
-    expect(byPath["app/build.gradle.kts"]?.reversal).toEqual({ type: "lines", lines: ['    implementation("com.clayver:clayver-android:0.1.0")'] });
+    expect(byPath["app/build.gradle.kts"]?.reversal).toEqual({ type: "lines", lines: ['    implementation("com.clayver:clayver-android:0.1.1")'] });
     expect(byPath["app/src/main/AndroidManifest.xml"]?.kind).toBe("platform-config");
-    expect(byPath["clayver-functions/lib/index.js"]?.action).toBe("created");
+    expect(byPath["clayver-functions/package.json"]?.action).toBe("created");
+    expect(byPath["clayver-functions/index.js"]?.action).toBe("created");
+    expect(byPath["clayver-functions/lib/index.js"]).toBeUndefined();
+    const fnPkg = JSON.parse(readFileSync(join(dir, "clayver-functions/package.json"), "utf8")) as {
+      main: string;
+      dependencies: Record<string, string>;
+    };
+    expect(fnPkg.main).toBe("index.js");
+    expect(fnPkg.dependencies.clayver).toMatch(/^\^/);
+    expect(fnPkg.dependencies["firebase-functions"]).toBeTruthy();
+    expect(readFileSync(join(dir, "clayver-functions/index.js"), "utf8")).toContain('require("clayver/functions")');
     expect(byPath["clayver-functions/.env.shop-prod"]?.action).toBe("created");
     expect(m.region).toBe("europe-west1");
     expect(readFileSync(join(dir, "clayver-functions/.env.shop-prod"), "utf8")).toContain("CLAYVER_FUNCTIONS_REGION=europe-west1");
@@ -137,41 +146,39 @@ describe("clayver.json", () => {
     expect(snapshot(dir)).toEqual(original);
   });
 
-  it("update re-copies changed functions, removes stale ones and redeploys", async () => {
+  it("update removes function source copied by an older CLI and redeploys", async () => {
     const dir = copyFixture("android");
     await runInit({ yes: true, admins: "admin@example.com" }, makeDeps({ cwd: dir, prompter: new NonInteractivePrompter(true) }));
-    // Pretend an older CLI had installed a file the new version no longer ships.
+    // An older CLI had copied the compiled functions into the app.
     const m = readManifest(dir)!;
+    mkdirSync(join(dir, "clayver-functions/lib"), { recursive: true });
+    writeFileSync(join(dir, "clayver-functions/lib/index.js"), "exports.clayverSetAgentRole = () => 'v1';\n");
     writeFileSync(join(dir, "clayver-functions/lib/old.js"), "old");
-    m.files.push({ path: "clayver-functions/lib/old.js", action: "created", kind: "functions", description: "old", sha256: sha256("old") });
+    m.files.push(
+      { path: "clayver-functions/lib/index.js", action: "created", kind: "functions", description: "compiled", sha256: sha256("exports.clayverSetAgentRole = () => 'v1';\n") },
+      { path: "clayver-functions/lib/old.js", action: "created", kind: "functions", description: "old", sha256: sha256("old") },
+    );
     writeFileSync(join(dir, "clayver.json"), serializeManifest(m));
-    // A newer CLI version ships a changed index.js.
-    const newer = mkdtempSync(join(tmpdir(), "clayver-assets-"));
-    cpSync(ASSETS, newer, { recursive: true });
-    writeFileSync(join(newer, "functions/lib/index.js"), "exports.clayverSetAgentRole = () => 'v2';\n");
 
-    const before = await runStatus({}, makeDeps({ cwd: dir, assetsDir: newer }));
-    expect(before.updateAvailable).toBe(true);
+    const before = await runStatus({}, makeDeps({ cwd: dir }));
+    expect(before.updateAvailable).toBe(false);
 
-    const up = makeDeps({ cwd: dir, assetsDir: newer, prompter: new NonInteractivePrompter(true) });
+    const up = makeDeps({ cwd: dir, prompter: new NonInteractivePrompter(true) });
     await runUpdate({ yes: true }, up);
-    expect(readFileSync(join(dir, "clayver-functions/lib/index.js"), "utf8")).toContain("v2");
+    expect(existsSync(join(dir, "clayver-functions/lib/index.js"))).toBe(false);
     expect(existsSync(join(dir, "clayver-functions/lib/old.js"))).toBe(false);
+    expect(existsSync(join(dir, "clayver-functions/lib"))).toBe(false);
+    expect(readFileSync(join(dir, "clayver-functions/index.js"), "utf8")).toContain('require("clayver/functions")');
     expect(up.runner.find("deploy", "--only", "database,storage,functions:clayver")).toBeDefined();
     const after = readManifest(dir)!;
-    expect(after.files.some((f) => f.path === "clayver-functions/lib/old.js")).toBe(false);
-    expect(after.files.find((f) => f.path === "clayver-functions/lib/index.js")?.sha256).toBe(sha256("exports.clayverSetAgentRole = () => 'v2';\n"));
-    expect((await runStatus({}, makeDeps({ cwd: dir, assetsDir: newer }))).updateAvailable).toBe(false);
+    expect(after.files.some((f) => f.path.startsWith("clayver-functions/lib/"))).toBe(false);
   });
 
-  it("update does not overwrite a hand-edited functions file under --yes", async () => {
+  it("update does not overwrite a hand-edited functions entry under --yes", async () => {
     const dir = copyFixture("android");
     await runInit({ yes: true, admins: "admin@example.com" }, makeDeps({ cwd: dir, prompter: new NonInteractivePrompter(true) }));
-    writeFileSync(join(dir, "clayver-functions/lib/index.js"), "// patched by hand\n");
-    const newer = mkdtempSync(join(tmpdir(), "clayver-assets-"));
-    cpSync(ASSETS, newer, { recursive: true });
-    writeFileSync(join(newer, "functions/lib/util.js"), "exports.helper = 2;\n");
-    await runUpdate({ yes: true, deploy: false }, makeDeps({ cwd: dir, assetsDir: newer, prompter: new NonInteractivePrompter(true) }));
-    expect(readFileSync(join(dir, "clayver-functions/lib/index.js"), "utf8")).toBe("// patched by hand\n");
+    writeFileSync(join(dir, "clayver-functions/index.js"), "// patched by hand\n");
+    await runUpdate({ yes: true, deploy: false }, makeDeps({ cwd: dir, prompter: new NonInteractivePrompter(true) }));
+    expect(readFileSync(join(dir, "clayver-functions/index.js"), "utf8")).toBe("// patched by hand\n");
   });
 });

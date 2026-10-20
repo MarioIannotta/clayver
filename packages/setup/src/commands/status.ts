@@ -1,5 +1,6 @@
 import { existsSync, readFileSync } from "node:fs";
-import { resolve } from "node:path";
+import { join, resolve } from "node:path";
+import { functionsFileChanges } from "../backend/functions.js";
 import { CLI_VERSION, FUNCTIONS_CODEBASE, FUNCTIONS_DIR } from "../constants.js";
 import { loadAssets } from "../core/assets.js";
 import { makeCtx, type CommonOptions, type Deps } from "../core/context.js";
@@ -16,7 +17,7 @@ export type FileState = "ok" | "modified" | "missing";
 export interface StatusReport {
   manifest: ClayverManifest;
   files: { path: string; state: FileState; action: string; description: string }[];
-  /** True when the bundled functions differ from the copied ones. */
+  /** True when the functions folder does not yet depend on this CLI version. */
   updateAvailable: boolean;
   deployedFunctions?: string[];
 }
@@ -59,14 +60,16 @@ export async function runStatus(opts: StatusOptions, deps: Deps): Promise<Status
   if (m.backend) {
     try {
       const assets = loadAssets(deps.assetsDir);
-      const prefix = `${m.backend.firebaseDir === "." ? "" : `${m.backend.firebaseDir}/`}${FUNCTIONS_DIR}/`;
-      for (const [rel, content] of assets.functionsFiles) {
-        const rec = m.files.find((r) => r.path === `${prefix}${rel}`);
-        if (!rec || rec.sha256 !== sha256(content)) updateAvailable = true;
+      const functionsDir = join(appDir, m.backend.firebaseDir, FUNCTIONS_DIR);
+      for (const change of functionsFileChanges(assets, functionsDir)) {
+        if (change.path.endsWith(".gitignore")) continue;
+        const want = typeof change.content === "string" ? Buffer.from(change.content) : change.content;
+        const disk = existsSync(change.path) ? readFileSync(change.path) : undefined;
+        if (!disk || !disk.equals(want)) updateAvailable = true;
       }
       logger.step("Updates");
-      if (updateAvailable) logger.warn(`This CLI bundles newer Clayver functions/rules (${assets.meta.functionsVersion ?? CLI_VERSION}). Run \`npx clayver update\`.`);
-      else logger.success("The copied functions match this CLI version.");
+      if (updateAvailable) logger.warn(`The functions folder does not depend on this CLI yet (${assets.meta.functionsVersion ?? CLI_VERSION}). Run \`npx clayver update\`.`);
+      else logger.success("The functions folder depends on this CLI version.");
     } catch (e) {
       logger.detail(`Could not compare with bundled assets: ${(e as Error).message}`);
     }

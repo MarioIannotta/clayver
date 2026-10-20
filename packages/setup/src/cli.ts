@@ -70,7 +70,7 @@ common(
 common(
   program
     .command("update")
-    .description("re-copy rules and functions from this CLI version (diff + confirmation) and redeploy")
+    .description("merge rules from this CLI version, point the functions at it, and redeploy")
     .option("--no-deploy", "update files only"),
 ).action((opts: UpdateOptions) => run(() => runUpdate(opts, defaultDeps(opts))));
 
