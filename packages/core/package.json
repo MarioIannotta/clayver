@@ -1,15 +1,15 @@
 {
   "name": "@clayver/core",
-  "version": "0.1.1",
+  "version": "0.2.0",
   "description": "Typed data model and framework-agnostic Firebase data-access layer for Clayver agent dashboards.",
   "license": "Apache-2.0",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/clayver/clayver.git",
+    "url": "git+https://github.com/MarioIannotta/clayver.git",
     "directory": "packages/core"
   },
-  "homepage": "https://github.com/clayver/clayver/tree/main/packages/core#readme",
-  "bugs": "https://github.com/clayver/clayver/issues",
+  "homepage": "https://github.com/MarioIannotta/clayver/tree/main/packages/core#readme",
+  "bugs": "https://github.com/MarioIannotta/clayver/issues",
   "type": "module",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",

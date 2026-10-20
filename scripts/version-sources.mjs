@@ -208,7 +208,7 @@ export function apply(version, { root = ROOT, dryRun = false } = {}) {
 // CHANGELOG.md (Keep a Changelog 1.1.0)
 
 export const CHANGELOG = "CHANGELOG.md";
-export const REPO_URL = "https://github.com/clayver/clayver";
+export const REPO_URL = "https://github.com/MarioIannotta/clayver";
 
 const escapeRe = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 

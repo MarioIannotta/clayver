@@ -52,7 +52,7 @@ describe("clayver.json", () => {
     expect(byPath["firebase.json"]?.action).toBe("modified");
     expect(byPath["database.rules.json"]?.reversal).toEqual({ type: "json-remove", paths: [["rules", "clayver"]] });
     expect(byPath["storage.rules"]?.reversal).toEqual({ type: "storage-rules-block" });
-    expect(byPath["app/build.gradle.kts"]?.reversal).toEqual({ type: "lines", lines: ['    implementation("com.clayver:clayver-android:0.1.1")'] });
+    expect(byPath["app/build.gradle.kts"]?.reversal).toEqual({ type: "lines", lines: ['    implementation("com.clayver:clayver-android:0.2.0")'] });
     expect(byPath["app/src/main/AndroidManifest.xml"]?.kind).toBe("platform-config");
     expect(byPath["clayver-functions/package.json"]?.action).toBe("created");
     expect(byPath["clayver-functions/index.js"]?.action).toBe("created");

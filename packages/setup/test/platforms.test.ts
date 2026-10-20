@@ -15,7 +15,7 @@ describe("init per platform", () => {
     const { manifest } = await runInit({ admins: "admin@example.com", skipBackend: true }, deps);
     expect(deps.runner.find("apps:create", "IOS", "com.example.myapp")?.args).toContain("--bundle-id");
     expect(readFileSync(join(dir, "MyApp/GoogleService-Info.plist"), "utf8")).toContain("shop-prod");
-    expect(readFileSync(join(dir, "Podfile"), "utf8")).toContain("target 'MyApp' do\n  pod 'ClayverSDK', '~> 0.1'\n");
+    expect(readFileSync(join(dir, "Podfile"), "utf8")).toContain("target 'MyApp' do\n  pod 'ClayverSDK', '~> 0.2'\n");
     expect(readFileSync(join(dir, "clayver-example/ios/ClayverSupportButton.swift"), "utf8")).toContain("ClayverChatView()");
     expect(manifest.steps.backend).toBe("skipped");
     expect(deps.runner.calls.some((c) => c.args[0] === "deploy")).toBe(false);
@@ -28,7 +28,7 @@ describe("init per platform", () => {
     const dir = copyFixture("flutter");
     const deps = makeDeps({ cwd: dir, prompter: new ScriptedPrompter([], true) });
     await runInit({ project: "shop-prod", admins: "admin@example.com", skipBackend: true, skipPush: true }, deps);
-    expect(readFileSync(join(dir, "pubspec.yaml"), "utf8")).toContain("dependencies:\n  clayver: ^0.1.1\n  flutter:");
+    expect(readFileSync(join(dir, "pubspec.yaml"), "utf8")).toContain("dependencies:\n  clayver: ^0.2.0\n  flutter:");
     expect(deps.logger.text()).toContain("flutterfire configure --project=shop-prod");
   });
 

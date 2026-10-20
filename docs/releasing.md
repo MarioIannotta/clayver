@@ -54,7 +54,7 @@ and variables → Actions**.
    Granular) with **Read and write** on the packages and scope above, and
    store it as `NPM_TOKEN`.
 3. Provenance needs a public GitHub repository and the `repository` field in
-   each published `package.json`, which points at `github.com/clayver/clayver`.
+   each published `package.json`, which points at `github.com/MarioIannotta/clayver`.
    If the repository lives elsewhere, update that field in
    `packages/setup/package.json` and `packages/core/package.json`.
 

@@ -11,6 +11,12 @@ listed under **Changed** or **Removed** with upgrade notes.
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-10-20
+
+### Changed
+
+- The `clayver` and `@clayver/core` packages point their repository, homepage, and issues links at `github.com/MarioIannotta/clayver`.
+
 ## [0.1.1] - 2026-10-20
 
 ### Changed
@@ -160,6 +166,7 @@ First public version: the minimum viable product.
 - Example apps for iOS, Android and Flutter, and documentation of the data
   model, SDK API contract, security model, identity verification and push.
 
-[Unreleased]: https://github.com/clayver/clayver/compare/v0.1.1...HEAD
-[0.1.1]: https://github.com/clayver/clayver/compare/v0.1.0...v0.1.1
-[0.1.0]: https://github.com/clayver/clayver/releases/tag/v0.1.0
+[Unreleased]: https://github.com/MarioIannotta/clayver/compare/v0.2.0...HEAD
+[0.2.0]: https://github.com/MarioIannotta/clayver/compare/v0.1.1...v0.2.0
+[0.1.1]: https://github.com/MarioIannotta/clayver/compare/v0.1.0...v0.1.1
+[0.1.0]: https://github.com/MarioIannotta/clayver/releases/tag/v0.1.0
