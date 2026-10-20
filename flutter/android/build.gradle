@@ -1,11 +1,14 @@
 // Android side of the Clayver Flutter plugin: a thin bridge over the native
 // Clayver Android SDK (`com.clayver:clayver-android`).
 //
-// Local development against an unpublished SDK: see "Using a local native SDK"
-// in ../README.md (Gradle composite build with `includeBuild`, or mavenLocal).
+// The release AAR is published into ./repo so app projects resolve it from
+// this package. Maven Central is used once `com.clayver:clayver-android` is
+// there; until then the bundled repo is what a normal app build uses.
 
 group = "com.clayver.flutter"
 version = "0.1.0"
+
+def bundledSdkRepo = new File(projectDir, "repo")
 
 buildscript {
     ext.kotlin_version = "2.1.21"
@@ -23,6 +26,9 @@ rootProject.allprojects {
     repositories {
         google()
         mavenCentral()
+        if (bundledSdkRepo.isDirectory()) {
+            maven { url = bundledSdkRepo }
+        }
     }
 }
 
