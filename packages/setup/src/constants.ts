@@ -40,7 +40,7 @@ export const EXAMPLE_DIR = "clayver-example";
 export const SDK = {
   version: "0.3.0",
   ios: {
-    spmUrl: "https://github.com/clayver/clayver",
+    spmUrl: "https://github.com/MarioIannotta/clayver",
     spmProduct: "ClayverSDK",
     module: "ClayverSDK",
   },
@@ -70,5 +70,5 @@ export const LINKS = {
   adc: "https://cloud.google.com/docs/authentication/provide-credentials-adc#local-dev",
   authorizedDomains: (p: string) => `https://console.firebase.google.com/project/${p}/authentication/settings`,
   webPushCerts: (p: string) => `https://console.firebase.google.com/project/${p}/settings/cloudmessaging`,
-  dashboardDocs: "https://github.com/clayver/clayver/tree/main/dashboard",
+  dashboardDocs: "https://github.com/MarioIannotta/clayver/tree/main/dashboard",
 };

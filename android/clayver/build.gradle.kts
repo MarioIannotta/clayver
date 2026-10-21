@@ -93,7 +93,7 @@ mavenPublishing {
         name.set("Clayver Android SDK")
         description.set("Open-source in-app customer support for Android, backed by your own Firebase project.")
         inceptionYear.set("2026")
-        url.set("https://github.com/clayver/clayver")
+        url.set("https://github.com/MarioIannotta/clayver")
         licenses {
             license {
                 name.set("Apache-2.0")
@@ -106,17 +106,17 @@ mavenPublishing {
                 id.set("clayver")
                 name.set("Clayver contributors")
                 email.set("oss@clayver.dev")
-                url.set("https://github.com/clayver/clayver/graphs/contributors")
+                url.set("https://github.com/MarioIannotta/clayver/graphs/contributors")
             }
         }
         scm {
-            url.set("https://github.com/clayver/clayver")
-            connection.set("scm:git:https://github.com/clayver/clayver.git")
-            developerConnection.set("scm:git:ssh://git@github.com/clayver/clayver.git")
+            url.set("https://github.com/MarioIannotta/clayver")
+            connection.set("scm:git:https://github.com/MarioIannotta/clayver.git")
+            developerConnection.set("scm:git:ssh://git@github.com/MarioIannotta/clayver.git")
         }
         issueManagement {
             system.set("GitHub")
-            url.set("https://github.com/clayver/clayver/issues")
+            url.set("https://github.com/MarioIannotta/clayver/issues")
         }
     }
 }

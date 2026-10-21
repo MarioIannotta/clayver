@@ -67,7 +67,7 @@ so the first version is published by hand:
    (delete the copied files afterwards; the workflow copies them on every release).
 2. On pub.dev, open the package's **Admin** tab → **Automated publishing** →
    **Enable publishing from GitHub Actions**:
-   - Repository: `clayver/clayver`
+   - Repository: `MarioIannotta/clayver`
    - Tag pattern: `v{{version}}`
    - Require GitHub Actions environment: **on**, environment `pub.dev`
 3. In GitHub, create the environment `pub.dev` (Settings → Environments). You
