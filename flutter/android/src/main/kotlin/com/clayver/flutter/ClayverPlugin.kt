@@ -188,10 +188,6 @@ public class ClayverPlugin : FlutterPlugin, ActivityAware, ClayverHostApi {
 
     override suspend fun isAgent(): Boolean = bridge { Clayver.isAgent() }
 
-    override suspend fun openAgentInbox(conversationId: String?) = bridge {
-        Clayver.openAgentInbox(requireActivity("openAgentInbox"), conversationId)
-    }
-
     override suspend fun sendAgentReply(
         conversationId: String,
         text: String?,

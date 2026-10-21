@@ -19,7 +19,7 @@ import UIKit
 /// try Auth.auth().signOut()
 /// ```
 public enum Clayver {
-    public static let sdkVersion = "0.2.0"
+    public static let sdkVersion = "0.3.0"
 
     // MARK: - State
 
@@ -58,6 +58,11 @@ public enum Clayver {
 
     static var configuredProjectId: String? {
         state.withLock { $0.client?.options.projectId }
+    }
+
+    /// The signed-in Firebase uid, `nil` before `configure` finishes or without a user.
+    static var currentUid: String? {
+        state.withLock { $0.client?.auth.currentUser?.uid }
     }
 
     /// `ClayverOptions.multipleConversations` from `configure`, `true` before it finishes.
@@ -169,7 +174,8 @@ public enum Clayver {
     #if canImport(UIKit)
     /// Handles a tapped notification. Returns `true` if it was a Clayver push, in which case
     /// the chat is opened on its conversation (after `configure` completes, if needed).
-    /// Pushes sent to agents (`audience: "agent"`) open the agent conversation view instead.
+    /// Pushes sent to agents (`audience: "agent"`) open the support UI in agent mode on that
+    /// conversation instead.
     /// Call from `userNotificationCenter(_:didReceive:withCompletionHandler:)`.
     @available(iOSApplicationExtension, unavailable)
     @discardableResult
@@ -204,7 +210,7 @@ public enum Clayver {
         case .customerChat(let conversationId):
             openChat(conversationId: conversationId)
         case .agentConversation(let conversationId):
-            openAgentInbox(conversationId: conversationId)
+            ClayverPresenter.presentAgentConversation(conversationId)
         case .ignore:
             break
         }
@@ -282,6 +288,11 @@ public enum Clayver {
     /// conversation list when the customer has a conversation, and a new empty chat otherwise; a
     /// `conversationId` opens that conversation with a back button to the list. Without it, the
     /// latest conversation (or a new one) opens and there is no list.
+    ///
+    /// Agents (see `isAgent()`) get a **Switch to support agent** button under **New
+    /// conversation** that turns the screen into the team inbox, and a **Switch to regular user**
+    /// button there to come back. The choice is remembered per user on this device, so the next
+    /// `openChat()` (without a `conversationId`) or `openConversations()` opens the same side.
     @available(iOSApplicationExtension, unavailable)
     @MainActor
     public static func openChat(conversationId: String? = nil, from viewController: UIViewController? = nil) {

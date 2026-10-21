@@ -5,7 +5,7 @@ import UIKit
 /// The customer's conversations, newest activity first: the last message, its time and an
 /// unread badge. Whether the team closed a conversation is not shown to the customer. Tapping a row opens the conversation; the
 /// **New conversation** button opens an empty chat that creates its conversation when the first
-/// message is sent.
+/// message is sent. With `onSwitchToAgent`, a **Switch to support agent** button sits under it.
 ///
 /// Embed it in a navigation container:
 /// ```swift
@@ -42,6 +42,7 @@ public struct ClayverConversationListView: View {
     @StateObject private var model: ClayverConversationListViewModel
     private let theme: ClayverTheme
     private let onClose: (() -> Void)?
+    private let onSwitchToAgent: (() -> Void)?
     private let entry: Entry
 
     @State private var destination: Destination?
@@ -54,25 +55,34 @@ public struct ClayverConversationListView: View {
     ///   - theme: Overrides the theme given to `Clayver.configure`.
     ///   - onClose: When set, a Close button is shown at the trailing end of the navigation bar,
     ///     on the list and on the chats opened from it.
+    ///   - onSwitchToAgent: When set, a **Switch to support agent** button is shown under
+    ///     **New conversation**. `ClayverSupportView` sets it for agents.
     @MainActor
-    public init(theme: ClayverTheme? = nil, onClose: (() -> Void)? = nil) {
-        self.init(entry: .list, theme: theme, onClose: onClose)
+    public init(theme: ClayverTheme? = nil, onClose: (() -> Void)? = nil, onSwitchToAgent: (() -> Void)? = nil) {
+        self.init(entry: .list, theme: theme, onClose: onClose, onSwitchToAgent: onSwitchToAgent)
     }
 
     /// Drives the view with your own model (tests, previews, custom data sources).
     @MainActor
-    public init(viewModel: @autoclosure @escaping () -> ClayverConversationListViewModel, theme: ClayverTheme = .default, onClose: (() -> Void)? = nil) {
+    public init(
+        viewModel: @autoclosure @escaping () -> ClayverConversationListViewModel,
+        theme: ClayverTheme = .default,
+        onClose: (() -> Void)? = nil,
+        onSwitchToAgent: (() -> Void)? = nil
+    ) {
         _model = StateObject(wrappedValue: viewModel())
         self.theme = theme
         self.onClose = onClose
+        self.onSwitchToAgent = onSwitchToAgent
         self.entry = .list
     }
 
     @MainActor
-    init(entry: Entry, theme: ClayverTheme? = nil, onClose: (() -> Void)? = nil) {
+    init(entry: Entry, theme: ClayverTheme? = nil, onClose: (() -> Void)? = nil, onSwitchToAgent: (() -> Void)? = nil) {
         _model = StateObject(wrappedValue: ClayverConversationListViewModel(dataSource: Clayver.chatDataSource))
         self.theme = theme ?? Clayver.configuredTheme
         self.onClose = onClose
+        self.onSwitchToAgent = onSwitchToAgent
         self.entry = entry
     }
 
@@ -84,18 +94,31 @@ public struct ClayverConversationListView: View {
         VStack(spacing: 0) {
             content
             Divider()
-            Button {
-                destination = .newConversation(UUID())
-            } label: {
-                Label("New conversation", systemImage: "square.and.pencil")
-                    .font(theme.bodyFont.weight(.semibold))
-                    .frame(maxWidth: .infinity)
+            VStack(spacing: 8) {
+                Button {
+                    destination = .newConversation(UUID())
+                } label: {
+                    Label("New conversation", systemImage: "square.and.pencil")
+                        .font(theme.bodyFont.weight(.semibold))
+                        .frame(maxWidth: .infinity)
+                }
+                .buttonStyle(.borderedProminent)
+                .controlSize(.large)
+                .accessibilityHint("Opens an empty chat")
+
+                if let onSwitchToAgent {
+                    Button(action: onSwitchToAgent) {
+                        Label("Switch to support agent", systemImage: "headphones")
+                            .font(theme.bodyFont.weight(.semibold))
+                            .frame(maxWidth: .infinity)
+                    }
+                    .buttonStyle(.bordered)
+                    .controlSize(.large)
+                    .accessibilityHint("Shows the support team's inbox")
+                }
             }
-            .buttonStyle(.borderedProminent)
-            .controlSize(.large)
             .padding(.horizontal, 16)
             .padding(.vertical, 10)
-            .accessibilityHint("Opens an empty chat")
         }
         .background(Color(UIColor.systemBackground).ignoresSafeArea())
         .background(

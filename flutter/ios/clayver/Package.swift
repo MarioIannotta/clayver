@@ -1,6 +1,6 @@
 // swift-tools-version: 5.9
 // Flutter looks for this manifest at ios/clayver/Package.swift so the plugin
-// builds with Swift Package Manager. CocoaPods remains available via the podspec.
+// builds with Swift Package Manager, the only iOS integration (no podspec).
 
 import PackageDescription
 

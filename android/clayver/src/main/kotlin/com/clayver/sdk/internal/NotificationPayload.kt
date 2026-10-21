@@ -27,7 +27,7 @@ internal sealed interface PushDestination {
     /** The customer chat ([com.clayver.sdk.ClayverChatActivity]). */
     data class CustomerChat(override val conversationId: String) : PushDestination
 
-    /** The agent conversation view ([com.clayver.sdk.ClayverAgentInboxActivity]). */
+    /** The agent conversation view (the support UI in agent mode, [com.clayver.sdk.ClayverChatActivity]). */
     data class AgentConversation(override val conversationId: String) : PushDestination
 }
 

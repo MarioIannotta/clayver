@@ -29,11 +29,6 @@ flutter_ios_podfile_setup
 target 'Runner' do
   use_frameworks!
 
-  # The native Clayver iOS SDK, built from this repository. Apps outside the
-  # repository use `pod 'ClayverSDK', :path => '<clayver>/ios'` until the pod is
-  # published, then drop this line.
-  pod 'ClayverSDK', :path => '../../../ios'
-
   flutter_install_all_ios_pods File.dirname(File.realpath(__FILE__))
   target 'RunnerTests' do
     inherit! :search_paths

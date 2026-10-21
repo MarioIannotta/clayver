@@ -1,1 +1,10 @@
-<manifest xmlns:android="http://schemas.android.com/apk/res/android" />
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <application>
+        <!-- Clayver.configure runs from Dart, after the Flutter activity starts: a push tapped on a
+             cold start is handed to the launcher activity (onMessageOpenedApp / getInitialMessage)
+             instead of opening the native chat before the SDK is configured. -->
+        <meta-data
+            android:name="com.clayver.sdk.CONFIGURES_FROM_APP_UI"
+            android:value="true" />
+    </application>
+</manifest>

@@ -120,7 +120,8 @@ async function platformTools(ctx: Ctx, app: DetectedApp) {
   if (app.platform === "flutter" && !(await runner.which("flutter"))) {
     logger.warn("`flutter` is not on your PATH. Install Flutter (https://docs.flutter.dev/get-started/install) to build the app.");
   }
-  const podfile = app.platform === "ios" ? app.ios?.podfile : app.flutter?.ios?.podfile;
+  // Flutter apps may still use CocoaPods for other plugins; Clayver itself is a Swift package.
+  const podfile = app.platform === "flutter" ? app.flutter?.ios?.podfile : undefined;
   if (podfile && !(await runner.which("pod"))) {
     logger.warn("The project uses CocoaPods but `pod` is not installed: `sudo gem install cocoapods` or `brew install cocoapods`.");
   }
@@ -513,7 +514,6 @@ async function example(ctx: Ctx, opts: InitOptions, s: State, files: FileOps) {
       if (outcome === "skipped") s.notes.push(`Add the Clayver SDK dependency to ${edit.file} (see the instructions above).`);
       else if (ctx.dryRun) logger.detail("(dry run: the dependency edit above needs your confirmation)");
       else if (app.platform === "flutter") s.notes.push("Run `flutter pub get`.");
-      else if (app.platform === "ios") s.notes.push("Run `pod install`.");
       else s.notes.push("Sync Gradle.");
     }
   } else if (app.platform === "ios") {

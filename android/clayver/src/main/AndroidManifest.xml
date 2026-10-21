@@ -13,16 +13,14 @@
             android:label="@string/clayver_chat_title"
             android:launchMode="singleTop"
             android:theme="@style/Clayver.Theme.Chat"
-            android:windowSoftInputMode="adjustResize" />
-
-        <!-- Agent mode: support staff answering from the app (Clayver.openAgentInbox). -->
-        <activity
-            android:name="com.clayver.sdk.ClayverAgentInboxActivity"
-            android:exported="false"
-            android:label="@string/clayver_agent_inbox_title"
-            android:launchMode="singleTop"
-            android:theme="@style/Clayver.Theme.Chat"
-            android:windowSoftInputMode="adjustResize" />
+            android:windowSoftInputMode="adjustResize">
+            <!-- The click action of Clayver pushes shown by the system while the app is in the
+                 background (firebase/functions/src/push.ts). FCM targets this app's package. -->
+            <intent-filter>
+                <action android:name="CLAYVER_OPEN_CONVERSATION" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
 
         <!-- Backports the Photo Picker to API 19-29 through Google Play services. -->
         <service

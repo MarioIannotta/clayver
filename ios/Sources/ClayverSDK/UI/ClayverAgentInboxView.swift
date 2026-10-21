@@ -14,12 +14,14 @@ import UIKit
 ///         .navigationViewStyle(.stack)
 /// }
 /// ```
-/// or use `Clayver.openAgentInbox()` from UIKit.
+/// `Clayver.openChat()` shows it to agents who chose **Switch to support agent**
+/// (see `ClayverSupportView`).
 @MainActor
 public struct ClayverAgentInboxView: View {
     @StateObject private var model: ClayverAgentInboxViewModel
     private let theme: ClayverTheme
     private let onClose: (() -> Void)?
+    private let onSwitchToCustomer: (() -> Void)?
 
     @State private var openConversationId: String?
     @State private var deepLinkConversationId: String?
@@ -28,12 +30,20 @@ public struct ClayverAgentInboxView: View {
     ///   - conversationId: Opens this conversation right away (e.g. from an agent push).
     ///   - theme: Overrides the theme given to `Clayver.configure`.
     ///   - onClose: When set, a Close button is shown in the navigation bar.
+    ///   - onSwitchToCustomer: When set, a **Switch to regular user** button is shown at the
+    ///     bottom. `ClayverSupportView` sets it.
     @MainActor
-    public init(conversationId: String? = nil, theme: ClayverTheme? = nil, onClose: (() -> Void)? = nil) {
+    public init(
+        conversationId: String? = nil,
+        theme: ClayverTheme? = nil,
+        onClose: (() -> Void)? = nil,
+        onSwitchToCustomer: (() -> Void)? = nil
+    ) {
         _model = StateObject(wrappedValue: ClayverAgentInboxViewModel(dataSource: Clayver.agentDataSource))
         _deepLinkConversationId = State(initialValue: conversationId)
         self.theme = theme ?? Clayver.configuredTheme
         self.onClose = onClose
+        self.onSwitchToCustomer = onSwitchToCustomer
     }
 
     /// Drives the view with your own model (tests, previews, custom data sources).
@@ -42,12 +52,14 @@ public struct ClayverAgentInboxView: View {
         viewModel: @autoclosure @escaping () -> ClayverAgentInboxViewModel,
         conversationId: String? = nil,
         theme: ClayverTheme = .default,
-        onClose: (() -> Void)? = nil
+        onClose: (() -> Void)? = nil,
+        onSwitchToCustomer: (() -> Void)? = nil
     ) {
         _model = StateObject(wrappedValue: viewModel())
         _deepLinkConversationId = State(initialValue: conversationId)
         self.theme = theme
         self.onClose = onClose
+        self.onSwitchToCustomer = onSwitchToCustomer
     }
 
     public var body: some View {
@@ -74,6 +86,20 @@ public struct ClayverAgentInboxView: View {
             }
 
             content
+
+            if let onSwitchToCustomer {
+                Divider()
+                Button(action: onSwitchToCustomer) {
+                    Label("Switch to regular user", systemImage: "person")
+                        .font(theme.bodyFont.weight(.semibold))
+                        .frame(maxWidth: .infinity)
+                }
+                .buttonStyle(.bordered)
+                .controlSize(.large)
+                .padding(.horizontal, 16)
+                .padding(.vertical, 10)
+                .accessibilityHint("Shows your own conversations")
+            }
         }
         .background(Color(UIColor.systemBackground).ignoresSafeArea())
         .background(

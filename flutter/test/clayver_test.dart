@@ -118,9 +118,6 @@ class FakeHostApi implements ClayverHostApi {
   @override
   Future<bool> isAgent() => _record('isAgent', [], agent);
   @override
-  Future<void> openAgentInbox(String? conversationId) =>
-      _record('openAgentInbox', [conversationId], null);
-  @override
   Future<ClayverMessageDto> sendAgentReply(
     String conversationId,
     String? text,
@@ -504,15 +501,11 @@ void main() {
       },
     );
 
-    test('isAgent and openAgentInbox forward to native', () async {
+    test('isAgent forwards to native', () async {
       api.agent = true;
       expect(await Clayver.isAgent(), isTrue);
-      await Clayver.openAgentInbox();
-      await Clayver.openAgentInbox(conversationId: '-Nx');
       expect(api.flat, [
         ['isAgent'],
-        ['openAgentInbox', null],
-        ['openAgentInbox', '-Nx'],
       ]);
     });
 
@@ -639,7 +632,6 @@ void main() {
     final Map<String, Future<Object?> Function()> agentCalls = {
       'agentRole': () => Clayver.agentRole(),
       'isAgent': () => Clayver.isAgent(),
-      'openAgentInbox': () => Clayver.openAgentInbox(),
       'sendAgentReply': () =>
           Clayver.sendAgentReply(conversationId: 'c', text: 't'),
       'setConversationStatus': () =>

@@ -365,12 +365,9 @@ class _HomePageState extends State<HomePage> {
               '5. Agent mode',
               style: Theme.of(context).textTheme.titleMedium,
             ),
-            const Text('You can answer customers from this app.'),
-            const SizedBox(height: 8),
-            FilledButton.icon(
-              onPressed: () => _run(Clayver.openAgentInbox, 'Inbox opened'),
-              icon: const Icon(Icons.inbox_outlined),
-              label: const Text('Agent inbox'),
+            const Text(
+              'You can answer customers from this app: open the chat and tap '
+              '"Switch to support agent".',
             ),
           ],
           const SizedBox(height: 8),

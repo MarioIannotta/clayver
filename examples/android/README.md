@@ -5,7 +5,7 @@ A minimal Compose app that shows the whole integration:
 | File | Shows |
 | --- | --- |
 | `ExampleApp.kt` | `Clayver.configure` in `Application.onCreate` |
-| `MainActivity.kt` | Firebase Auth email/password sign-in and sign-up (linking the anonymous user so chats started before login are kept), `setUserProperties`, `Clayver.logout()` before `FirebaseAuth.signOut()`, a support button with an unread badge (`unreadCountFlow`), `openChat`, `handleIntent` for tapped pushes, a **Register for push notifications** button (asks for the Android 13 notification permission, then passes the FCM token to `Clayver.setPushToken`), and an **Agent inbox** button (`openAgentInbox`) shown only when `Clayver.agentRole()` is not null |
+| `MainActivity.kt` | Firebase Auth email/password sign-in and sign-up (linking the anonymous user so chats started before login are kept), `setUserProperties`, `Clayver.logout()` before `FirebaseAuth.signOut()`, a support button with an unread badge (`unreadCountFlow`), `openChat`, `handleIntent` for tapped pushes, a **Register for push notifications** button (asks for the Android 13 notification permission, then passes the FCM token to `Clayver.setPushToken`), and, when `Clayver.agentRole()` is not null, a hint that the chat offers **Switch to support agent** |
 | `ExampleMessagingService.kt` | Delegating `onNewToken` / `onMessageReceived` from the app's own `FirebaseMessagingService` |
 
 The project builds the SDK from source through `includeBuild("../../android")`.

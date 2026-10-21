@@ -293,14 +293,12 @@ abstract final class Clayver {
         () async => ClayverAgentRole.parse(await _api.agentRole(forceRefresh)),
       );
 
-  /// Whether the signed-in user is an agent or admin of the workspace. Use it
-  /// to decide whether to show agent features such as [openAgentInbox].
+  /// Whether the signed-in user is an agent or admin of the workspace.
+  ///
+  /// Agents need no separate entry point: [openChat] shows them a
+  /// **Switch to support agent** button that turns the native screen into the
+  /// team inbox, and remembers the choice per user on the device.
   static Future<bool> isAgent() => _call(_api.isAgent);
-
-  /// Opens the native agent inbox, straight on [conversationId] when given.
-  /// Users without a role see a "no access" screen.
-  static Future<void> openAgentInbox({String? conversationId}) =>
-      _call(() => _api.openAgentInbox(conversationId));
 
   /// Live list of the workspace's conversations with [status], newest
   /// activity first, at most [limit]. With [tagId], only the conversations

@@ -1,7 +1,4 @@
 import Foundation
-#if canImport(UIKit)
-import UIKit
-#endif
 
 /// Agent mode: support staff answering customers from the app that embeds the SDK.
 ///
@@ -9,11 +6,8 @@ import UIKit
 /// what the UI offers; the database rules check `agents/{auth.uid}/active` on every operation.
 /// Agent APIs throw `ClayverError.permissionDenied` early when the role is missing.
 ///
-/// ```swift
-/// if try await Clayver.isAgent() {
-///     Clayver.openAgentInbox()
-/// }
-/// ```
+/// There is no separate entry point for the agent UI: `Clayver.openChat()` offers agents a
+/// **Switch to support agent** button and remembers their choice (see `openChat`).
 extension Clayver {
     // MARK: - Role
 
@@ -173,16 +167,4 @@ extension Clayver {
     public static var agentDataSource: ClayverAgentDataSource {
         FirebaseAgentDataSource(resolve: { try await requireClient() })
     }
-
-    // MARK: - UI
-
-    #if canImport(UIKit)
-    /// Presents the agent inbox modally from `viewController`, or from the top-most view
-    /// controller. With a `conversationId`, the inbox opens straight into that conversation.
-    @available(iOSApplicationExtension, unavailable)
-    @MainActor
-    public static func openAgentInbox(conversationId: String? = nil, from viewController: UIViewController? = nil) {
-        ClayverPresenter.presentAgentInbox(conversationId: conversationId, from: viewController)
-    }
-    #endif
 }

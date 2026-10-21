@@ -16,15 +16,15 @@ workflow does and the one-time setup of each registry.
 | `dashboard` | Builds the dashboard without project config and packs `clayver-dashboard-<version>.tar.gz` (+ `.sha256`). | | never |
 | `npm` | `@clayver/core` and `clayver` (packages/setup) with [provenance](https://docs.npmjs.com/generating-provenance-statements). Pre-releases use the dist-tag `next`. Already-published versions are skipped. | secret `NPM_TOKEN` | `NPM_TOKEN` is not set |
 | `maven` | `com.clayver:clayver-android` to Maven Central through the Central Portal (`publishAndReleaseToMavenCentral`, [vanniktech maven-publish](https://vanniktech.github.io/gradle-maven-publish-plugin/)), signed with an in-memory GPG key. | secrets `MAVEN_CENTRAL_USERNAME`, `MAVEN_CENTRAL_PASSWORD`, `SIGNING_KEY`, `SIGNING_KEY_PASSWORD`, optional `SIGNING_KEY_ID` | any of the first three is not set |
-| `cocoapods` | `ClayverSDK` to CocoaPods trunk (`pod trunk push ios/ClayverSDK.podspec`), on macOS. Lints the spec against the tag first. | secret `COCOAPODS_TRUNK_TOKEN` | the token is not set |
-| `pub` | The Flutter plugin (`flutter/`) to pub.dev with OIDC automated publishing. Runs after `maven` and `cocoapods` (the plugin depends on both native SDKs) unless they failed. | repository variable `PUB_DEV_PUBLISH=true`, environment `pub.dev` | the variable is not `true` |
+| `pub` | The Flutter plugin (`flutter/`) to pub.dev with OIDC automated publishing. Runs after `maven` (the plugin depends on the Android SDK) unless it failed. Its iOS side is a Swift package that resolves `ClayverSDK` from this repository. | repository variable `PUB_DEV_PUBLISH=true`, environment `pub.dev` | the variable is not `true` |
 | `github-release` | A GitHub Release named after the tag, with the changelog section, install snippets and the dashboard tarball. Marked as a pre-release for `-beta`/`-rc` versions. | the built-in `GITHUB_TOKEN` | never |
 
 Swift Package Manager needs nothing: the root `Package.swift` is resolved from
-the tag (SwiftPM accepts the `v` prefix).
+the tag (SwiftPM accepts the `v` prefix). It is the only iOS distribution;
+there is no CocoaPods pod.
 
 Publishing is idempotent where the registry allows it: re-running the workflow
-skips npm packages and pods that already exist and updates the GitHub Release
+skips npm packages that already exist and updates the GitHub Release
 in place. Maven Central and pub.dev reject a version that already exists, so
 re-run only the jobs that failed.
 
@@ -41,7 +41,6 @@ and variables → Actions**.
 | `SIGNING_KEY` | secret | ASCII-armored GPG private key: `gpg --export-secret-keys --armor <key id>`. |
 | `SIGNING_KEY_PASSWORD` | secret | The key's passphrase (leave unset if it has none). |
 | `SIGNING_KEY_ID` | secret, optional | The last 8 hex characters of the key id, if the export holds several keys. |
-| `COCOAPODS_TRUNK_TOKEN` | secret | A CocoaPods trunk session token (below). |
 | `PUB_DEV_PUBLISH` | variable | `true` once pub.dev automated publishing is set up. |
 
 ## One-time registry setup
@@ -109,22 +108,6 @@ Central rejects a deployment without sources, javadoc and signatures, which
 the plugin adds. `publishAndReleaseToMavenCentral` waits for validation and
 releases automatically.
 
-### CocoaPods trunk
-
-1. Register a session (once per maintainer):
-   `pod trunk register oss@clayver.dev 'Clayver' --description='GitHub Actions'`
-   and click the link in the email.
-2. Read the token: `grep -A2 trunk.cocoapods.org ~/.netrc` (the `password`
-   value) and store it as `COCOAPODS_TRUNK_TOKEN`.
-3. After the first push, add other maintainers with
-   `pod trunk add-owner ClayverSDK <email>`.
-
-`ios/ClayverSDK.podspec` downloads the source from the tag `v<version>`; its
-`source_files` pattern resolves both from the repository root (published pod)
-and from `ios/` (`:path` installs). The Flutter plugin's pod
-(`flutter/ios/clayver.podspec`) is not pushed to trunk: Flutter installs it
-from the plugin package and it depends on `ClayverSDK ~> <version>`.
-
 ## Repository settings worth enabling
 
 - **Private vulnerability reporting** (Settings → Code security), which
@@ -142,5 +125,4 @@ from the plugin package and it depends on `ClayverSDK ~> <version>`.
   other registries are not published twice.
 - **A bad version reached a registry**: registries do not allow replacing a
   version. Publish a patch release. On npm you can `npm deprecate`, on pub.dev
-  retract the version (Admin tab), and on CocoaPods `pod trunk delete ClayverSDK <version>`
-  (the same version can never be pushed again).
+  retract the version (Admin tab).

@@ -12,13 +12,14 @@ A minimal app that uses the [`clayver`](../../flutter) plugin:
   `Clayver.unreadCountStream`, shown only when the count is above zero
 - `Clayver.openChat` and notification taps through `Clayver.handleNotification`
 
-The app builds the native SDKs from this repository: the iOS `Podfile` points at
-`../../../ios` and `android/settings.gradle.kts` substitutes
+On iOS the plugin's Swift package (`flutter/ios/clayver/Package.swift`) brings
+in the native `ClayverSDK` package; `android/settings.gradle.kts` substitutes
 `com.clayver:clayver-android` with the `../../../android` Gradle build.
 
 ## Prerequisites
 
-- Flutter 3.32 or newer, Xcode 16+ with CocoaPods, Android Studio / Android SDK 35.
+- Flutter 3.32 or newer with Swift Package Manager enabled
+  (`flutter config --enable-swift-package-manager`), Xcode 16+, Android Studio / Android SDK 35.
 - A Firebase project with the Clayver backend deployed (`npx clayver init` from
   the repository root, see the [main README](../../README.md)). Enable the
   **Email/Password** and **Anonymous** sign-in methods in Firebase

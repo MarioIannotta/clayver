@@ -150,11 +150,9 @@ struct ContentView: View {
                 // the role from the ID token only decides whether to show these buttons.
                 if let agentRole {
                     Section("Support team (\(agentRole.rawValue))") {
-                        Button {
-                            Clayver.openAgentInbox()
-                        } label: {
-                            Label("Agent inbox", systemImage: "tray.full")
-                        }
+                        Text("Open the chat and tap \"Switch to support agent\" to answer customers.")
+                            .font(.footnote)
+                            .foregroundColor(.secondary)
                         Button("Agent inbox in a SwiftUI sheet") { showSwiftUIInbox = true }
                     }
                 }

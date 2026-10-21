@@ -32,7 +32,7 @@ cd clayver-dashboard && npm install && npm start   # the agent dashboard on http
 | Flag | Meaning |
 | --- | --- |
 | `--dry-run` | Print every action, file diff and command without writing files, deploying or registering anything. Read-only queries such as `firebase projects:list` still run, so the plan is accurate. |
-| `-y, --yes` | Accept safe defaults without asking. It creates new files, adds Clayver's own entries (for example the `clayver` rules subtree or the `clayver` functions codebase), registers the app and deploys. It **never** overwrites a file you edited, never edits `pubspec.yaml`, Gradle files, the Podfile or `AndroidManifest.xml`, and never deletes anything. |
+| `-y, --yes` | Accept safe defaults without asking. It creates new files, adds Clayver's own entries (for example the `clayver` rules subtree or the `clayver` functions codebase), registers the app and deploys. It **never** overwrites a file you edited, never edits `pubspec.yaml`, Gradle files or `AndroidManifest.xml`, and never deletes anything. |
 | `--platform ios\|android\|flutter` | Skip platform detection. |
 | `--dir <path>` | The app directory (default: the current directory). |
 | `--project <firebaseProjectId>` | The Firebase project. Default: the one your config files point at, picked from `firebase projects:list`. |
@@ -49,7 +49,7 @@ cd clayver-dashboard && npm install && npm start   # the agent dashboard on http
 What it does, in order:
 
 1. **Prerequisites.** Checks the Node version, the Firebase CLI and its login, and the platform
-   tools (`flutter`, `pod`). If something is missing, it tells you how to fix it.
+   tools (`flutter`, and `pod` for Flutter apps that still use CocoaPods for other plugins). If something is missing, it tells you how to fix it.
 2. **App.** Detects iOS (`*.xcodeproj`, `Podfile`, `Package.swift`, bundle id from `project.pbxproj`),
    Android (`settings.gradle(.kts)` + the application module's `build.gradle(.kts)`, `applicationId`)
    or Flutter (`pubspec.yaml` depending on the Flutter SDK). It asks only what detection cannot answer.
@@ -184,7 +184,7 @@ link. `--dry-run` prints the writes without making them.
 | `clayver-dashboard/package.json` | `npm start` → `clayver dashboard start --dir .`, `npm run deploy` → `clayver dashboard deploy --dir .`, and a devDependency on `clayver` at this CLI's version. |
 | `clayver-dashboard/firebase.json`, `.gitignore`, `README.md` | Hosting target for `deploy` (serves `public/`), git-ignores `node_modules/`, `public/` and `.firebase/`, and explains the folder. `remove` deletes the folder, including `node_modules/` and `public/`. The registered web app is kept (delete it in the console if unused). |
 | `clayver-example/flutter/clayver_support.dart` | `setupClayver()` (configure, FCM token, notification taps), a sign-out helper, and a `ClayverSupportButton` widget. |
-| `pubspec.yaml`, `app/build.gradle(.kts)`, `Podfile` | Changed only after you confirm. Clayver adds one dependency line, and `remove` deletes it again. |
+| `pubspec.yaml`, `app/build.gradle(.kts)` | Changed only after you confirm. Clayver adds one dependency line, and `remove` deletes it again. iOS apps add the Swift package in Xcode (the CLI prints the URL); Clayver has no CocoaPods pod. |
 | `AndroidManifest.xml` | Changed only after you confirm. Clayver adds the `POST_NOTIFICATIONS` permission line. |
 
 The example files are samples: copy what you need into your app. They contain no secrets.

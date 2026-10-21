@@ -18,10 +18,10 @@ The module is `android/clayver` (package `com.clayver.sdk`, Maven coordinates
   // settings.gradle.kts
   includeBuild("path/to/clayver/android")
   // app/build.gradle.kts
-  dependencies { implementation("com.clayver:clayver-android:0.2.0") }
+  dependencies { implementation("com.clayver:clayver-android:0.3.0") }
   ```
 - **Maven local**: `cd android && ./gradlew :clayver:publishToMavenLocal`, add
-  `mavenLocal()` to your repositories, then depend on `com.clayver:clayver-android:0.2.0`.
+  `mavenLocal()` to your repositories, then depend on `com.clayver:clayver-android:0.3.0`.
 
 The SDK brings the Firebase BoM (auth, database, storage, functions, messaging),
 Compose Material 3 and Coil. Your app still needs the
@@ -108,8 +108,15 @@ screen. Customise the icon, colour and channel with
 `ClayverOptions(notifications = ClayverNotificationOptions(smallIcon = R.drawable.ic_stat_support))`.
 
 **3. Background taps.** When the app is in the background, Android shows the
-notification itself and a tap starts your **launcher activity** with the data
-block as extras. Forward it:
+notification itself. Clayver pushes carry the click action
+`CLAYVER_OPEN_CONVERSATION`, which the library manifest routes to
+`ClayverChatActivity`, so a tap opens the conversation with no code on your side
+(agent pushes open the support UI in agent mode). If your app was not running,
+closing the chat returns into your launcher activity. On such a cold start the
+chat waits briefly for the `Clayver.configure` started in `Application.onCreate`;
+if nothing configures the SDK by then (for example because you call `configure`
+from an activity), the tap is passed on to your **launcher activity** with the
+data block as extras. Forward it there, which also covers `clayver://` deep links:
 
 ```kotlin
 override fun onCreate(savedInstanceState: Bundle?) {
@@ -292,11 +299,17 @@ agents (`clayver admin grant --email <email> --role agent`). The SDK only uses
 the claim to decide what to show and to fail fast; the database rules check
 `agents/{uid}/active` on every read and write.
 
+There is no separate entry point for agents: `Clayver.openChat(context)` shows
+agents a **Switch to support agent** button under **New conversation**, which
+turns the screen into the team inbox; the inbox has a **Switch to regular
+user** button. The choice is remembered per user on the device, so the next
+`openChat` (without a conversation id) or `openConversations` opens the same
+side. Agent pushes open the inbox on their conversation.
+
 ```kotlin
-if (Clayver.isAgent()) {                       // agentRole(): ClayverAgentRole.ADMIN / AGENT / null
-    Clayver.openAgentInbox(context)            // ClayverAgentInboxActivity (declared in the library manifest)
-}
-// or in Compose
+Clayver.openChat(context)                      // agents can switch to the inbox from here
+Clayver.isAgent()                              // agentRole(): ClayverAgentRole.ADMIN / AGENT / null
+// or in Compose, with your own navigation
 ClayverAgentInboxScreen(onClose = { navController.popBackStack() })
 ClayverAgentConversationScreen(conversationId, onBack = { ... }, onOpenConversation = { id -> ... })   // with your own navigation
 ```
@@ -323,7 +336,6 @@ ClayverAgentConversationScreen(conversationId, onBack = { ... }, onOpenConversat
 | `fun customerConversationsFlow(customerId, limit = 50)` | The customer's conversations (`orderByChild("customerId").equalTo(...)`), newest first. |
 | `fun customerBlockStatusFlow(customerId)` / `suspend fun blockCustomer(customerId, reason, until = null)` / `unblockCustomer(customerId)` | `moderation/{customerId}`; `reason` is `SPAM`, `ABUSE` or `OTHER`, `until` in ms (null = until unblocked). |
 | `fun teamFlow(): Flow<List<ClayverTeammate>>` | `agents/`, sorted by name (used for the assignee's name). |
-| `fun openAgentInbox(context, conversationId = null)` | Opens the inbox, optionally on a conversation. |
 
 Every agent API throws `PERMISSION_DENIED` right away when the token has no
 role for the workspace.

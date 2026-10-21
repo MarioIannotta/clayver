@@ -63,7 +63,9 @@ enum ClayverParsing {
 
     static func conversation(id: String, value: Any?) -> ClayverConversation? {
         guard let dict = value as? [String: Any] else { return nil }
-        let unread = (dict["unread"] as? [String: Any]).flatMap { int($0["customer"]) } ?? 0
+        // inbox/{cid}/conversations entries store the customer's count as a bare number;
+        // conversations/{id} records store `{ customer, agent }`.
+        let unread = int(dict["unread"]) ?? (dict["unread"] as? [String: Any]).flatMap { int($0["customer"]) } ?? 0
         return ClayverConversation(
             id: id,
             status: string(dict["status"]).flatMap(ClayverConversation.Status.init(rawValue:)) ?? .unknown,

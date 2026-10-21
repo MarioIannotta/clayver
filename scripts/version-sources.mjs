@@ -22,10 +22,6 @@ export const SEMVER =
 
 const exact = (v) => v;
 const caret = (v) => v; // the "^" lives in the prefix group
-const majorMinor = (v) => {
-  const [major, minor] = v.split(/[.+-]/);
-  return `${major}.${minor}`;
-};
 
 // A version-looking token: digits, dots, and pre-release/build characters.
 const V = "(\\d+\\.\\d+\\.\\d+(?:[-+][0-9A-Za-z.+-]*)?)";
@@ -54,7 +50,6 @@ export const SOURCES = [
     file: "packages/setup/src/constants.ts",
     patterns: [
       { name: "SDK.version", re: new RegExp(`(export const SDK = \\{\\s*version: ")${V}(")`), render: exact },
-      { name: "SDK.ios.podVersion", re: /(podVersion: "~> )(\d+\.\d+)(")/, render: majorMinor },
       {
         name: "SDK.android.version",
         re: new RegExp(`(coordinates: "com\\.clayver:clayver-android",\\s*version: ")${V}(")`),
@@ -74,15 +69,10 @@ export const SOURCES = [
     optional: true,
     patterns: [
       { name: "pubspec dependency line", re: new RegExp(`(clayver: \\^)${V}(\\\\n)`, "g"), render: caret, all: true },
-      { name: "Podfile line", re: /(pod 'ClayverSDK', '~> )(\d+\.\d+)('\\n)/g, render: majorMinor, all: true },
     ],
   },
 
   // iOS
-  {
-    file: "ios/ClayverSDK.podspec",
-    patterns: [{ name: "s.version", re: new RegExp(`^(\\s*s\\.version\\s*=\\s*')${V}(')`, "m"), render: exact }],
-  },
   {
     file: "ios/Sources/ClayverSDK/Clayver.swift",
     patterns: [{ name: "sdkVersion", re: new RegExp(`(public static let sdkVersion = ")${V}(")`), render: exact }],
@@ -98,13 +88,6 @@ export const SOURCES = [
   {
     file: "flutter/pubspec.yaml",
     patterns: [{ name: "version", re: new RegExp(`^(version:[ \\t]*)${V}([ \\t]*)$`, "m"), render: exact }],
-  },
-  {
-    file: "flutter/ios/clayver.podspec",
-    patterns: [
-      { name: "s.version", re: new RegExp(`^(\\s*s\\.version\\s*=\\s*')${V}(')`, "m"), render: exact },
-      { name: "ClayverSDK dependency", re: new RegExp(`(s\\.dependency\\s+'ClayverSDK',\\s*'~>\\s*)${V}(')`), render: exact },
-    ],
   },
   {
     file: "flutter/android/build.gradle",

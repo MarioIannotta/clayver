@@ -245,9 +245,11 @@ private fun HomeScreen() {
         // Shown only to agents and admins of the workspace (claim clayver_roles[projectId]).
         // The database rules enforce the role on every read and write regardless.
         agentRole?.let { role ->
-            OutlinedButton(onClick = { Clayver.openAgentInbox(context) }) {
-                Text(if (role == ClayverAgentRole.ADMIN) "Agent inbox (admin)" else "Agent inbox")
-            }
+            val label = if (role == ClayverAgentRole.ADMIN) "admin" else "agent"
+            Text(
+                "You are a support $label: open the chat and tap \"Switch to support agent\".",
+                style = MaterialTheme.typography.bodySmall,
+            )
         }
     }
 }

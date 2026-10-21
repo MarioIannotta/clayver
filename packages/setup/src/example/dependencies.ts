@@ -55,19 +55,7 @@ export function gradleEdit(buildFile: string, kotlinDsl: boolean): DependencyEdi
   };
 }
 
-export function podfileEdit(podfile: string): DependencyEdit {
-  const line = `  pod '${SDK.ios.podName}', '${SDK.ios.podVersion}'`;
-  return {
-    file: podfile,
-    lines: [line],
-    apply(text) {
-      if (text.includes(`'${SDK.ios.podName}'`) || text.includes(`"${SDK.ios.podName}"`)) return undefined;
-      return insertAfter(text, /^\s*target\s+['"][^'"]+['"]\s+do\s*$/, [line]);
-    },
-  };
-}
-
-/** The edit Clayver can offer, if any (SPM-only Xcode projects get instructions). */
+/** The edit Clayver can offer, if any (iOS apps get Swift Package Manager instructions). */
 export function dependencyEditFor(app: DetectedApp): DependencyEdit | undefined {
   switch (app.platform) {
     case "flutter":
@@ -75,7 +63,7 @@ export function dependencyEditFor(app: DetectedApp): DependencyEdit | undefined 
     case "android":
       return app.android ? gradleEdit(app.android.buildFile, app.android.kotlinDsl) : undefined;
     case "ios":
-      return app.ios?.podfile ? podfileEdit(app.ios.podfile) : undefined;
+      return undefined;
   }
 }
 
@@ -85,8 +73,6 @@ export function dependencyInstructions(app: DetectedApp): string[] {
       return [
         "Swift Package Manager (Xcode > File > Add Package Dependencies…):",
         `  ${SDK.ios.spmUrl}  → product "${SDK.ios.spmProduct}" (also add FirebaseAuth and FirebaseMessaging from firebase-ios-sdk)`,
-        "CocoaPods (Podfile, inside your app target):",
-        `  pod '${SDK.ios.podName}', '${SDK.ios.podVersion}'   then: pod install`,
       ];
     case "android":
       return [

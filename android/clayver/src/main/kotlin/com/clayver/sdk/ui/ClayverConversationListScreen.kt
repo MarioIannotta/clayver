@@ -20,6 +20,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Face
 import androidx.compose.material3.Badge
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -28,6 +29,7 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -74,6 +76,8 @@ import kotlinx.coroutines.flow.first
  *   [ClayverChatScreen] for the id.
  * @param onNewConversation handle navigation yourself and show
  *   `ClayverChatScreen(newConversation = true)`.
+ * @param onSwitchToAgent shows a **Switch to support agent** button under
+ *   **New conversation** when set. [Clayver.openChat] sets it for agents.
  */
 @Composable
 public fun ClayverConversationListScreen(
@@ -82,11 +86,12 @@ public fun ClayverConversationListScreen(
     onClose: (() -> Unit)? = null,
     onOpenConversation: ((conversationId: String) -> Unit)? = null,
     onNewConversation: (() -> Unit)? = null,
+    onSwitchToAgent: (() -> Unit)? = null,
 ) {
     if (onOpenConversation != null && onNewConversation != null) {
-        ConversationListPane(modifier, theme, onClose, onOpenConversation, onNewConversation)
+        ConversationListPane(modifier, theme, onClose, onOpenConversation, onNewConversation, onSwitchToAgent)
     } else {
-        ChatNavHost(listOf(ChatDestination.List), modifier, theme, onClose, onOpenConversation, onNewConversation)
+        ChatNavHost(listOf(ChatDestination.List), modifier, theme, onClose, onOpenConversation, onNewConversation, onSwitchToAgent)
     }
 }
 
@@ -103,6 +108,7 @@ internal fun ClayverChatRoot(
     conversationId: String?,
     theme: ClayverTheme,
     onClose: () -> Unit,
+    onSwitchToAgent: (() -> Unit)? = null,
 ) {
     val multiple = Clayver.options?.multipleConversations ?: true
     val needsCount = ConversationRouting.needsConversationCount(entry, conversationId, multiple)
@@ -125,7 +131,7 @@ internal fun ClayverChatRoot(
         }
         return
     }
-    ChatNavHost(stack, Modifier, theme, onClose)
+    ChatNavHost(stack, Modifier, theme, onClose, onSwitchToAgent = onSwitchToAgent)
 }
 
 private val StackSaver: Saver<List<ChatDestination>, Any> = Saver(
@@ -147,6 +153,7 @@ internal fun ChatNavHost(
     onClose: (() -> Unit)?,
     onOpenConversation: ((String) -> Unit)? = null,
     onNewConversation: (() -> Unit)? = null,
+    onSwitchToAgent: (() -> Unit)? = null,
 ) {
     var stack by rememberSaveable(stateSaver = StackSaver) { mutableStateOf(initialStack) }
     // Each new chat gets its own view model; tokens are never reused.
@@ -172,6 +179,7 @@ internal fun ChatNavHost(
                     nextToken++
                 }
             },
+            onSwitchToAgent = onSwitchToAgent,
         )
         ChatDestination.Latest -> ChatScreen(modifier, null, false, "clayver-chat:latest", theme, onClose, back)
         is ChatDestination.New -> ChatScreen(modifier, null, true, "clayver-chat:new:${top.token}", theme, onClose, back)
@@ -190,6 +198,7 @@ private fun ConversationListPane(
     onClose: (() -> Unit)?,
     onOpen: (String) -> Unit,
     onNew: () -> Unit,
+    onSwitchToAgent: (() -> Unit)? = null,
 ) {
     val vm: ConversationListViewModel = viewModel(key = "clayver-conversations", factory = ConversationListViewModel.factory())
     val state by vm.state.collectAsStateWithLifecycle()
@@ -201,6 +210,7 @@ private fun ConversationListPane(
             onClose = onClose,
             onOpen = onOpen,
             onNew = onNew,
+            onSwitchToAgent = onSwitchToAgent,
             modifier = modifier,
         )
     }
@@ -215,6 +225,7 @@ private fun ConversationListContent(
     onClose: (() -> Unit)?,
     onOpen: (String) -> Unit,
     onNew: () -> Unit,
+    onSwitchToAgent: (() -> Unit)?,
     modifier: Modifier,
 ) {
     val colors = LocalClayverColors.current
@@ -243,17 +254,33 @@ private fun ConversationListContent(
             }
         }
         Surface(color = colors.surface, shadowElevation = 4.dp) {
-            Button(
-                onClick = onNew,
-                colors = ButtonDefaults.buttonColors(containerColor = colors.accent, contentColor = colors.onAccent),
-                modifier = Modifier
+            Column(
+                Modifier
                     .fillMaxWidth()
                     .navigationBarsPadding()
                     .padding(horizontal = 16.dp, vertical = 12.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp),
             ) {
-                Icon(Icons.Filled.Add, contentDescription = null)
-                Spacer(Modifier.width(8.dp))
-                Text(stringResource(R.string.clayver_new_conversation))
+                Button(
+                    onClick = onNew,
+                    colors = ButtonDefaults.buttonColors(containerColor = colors.accent, contentColor = colors.onAccent),
+                    modifier = Modifier.fillMaxWidth(),
+                ) {
+                    Icon(Icons.Filled.Add, contentDescription = null)
+                    Spacer(Modifier.width(8.dp))
+                    Text(stringResource(R.string.clayver_new_conversation))
+                }
+                if (onSwitchToAgent != null) {
+                    OutlinedButton(
+                        onClick = onSwitchToAgent,
+                        colors = ButtonDefaults.outlinedButtonColors(contentColor = colors.accent),
+                        modifier = Modifier.fillMaxWidth(),
+                    ) {
+                        Icon(Icons.Filled.Face, contentDescription = null)
+                        Spacer(Modifier.width(8.dp))
+                        Text(stringResource(R.string.clayver_switch_to_agent))
+                    }
+                }
             }
         }
     }

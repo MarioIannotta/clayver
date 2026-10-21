@@ -77,10 +77,16 @@ public object Clayver {
     /** True once [configure] has completed successfully. */
     public val isConfigured: Boolean get() = core != null
 
+    /** True once [configure] has completed or while it is running. */
+    internal val isConfiguredOrConfiguring: Boolean get() = core != null || configuring != null
+
     /** The options passed to the last successful [configure], if any. */
     public val options: ClayverOptions? get() = core?.options
 
     internal val theme: ClayverTheme get() = core?.options?.theme ?: ClayverTheme()
+
+    /** The signed-in Firebase uid, null before [configure] finishes or without a user. */
+    internal val currentUid: String? get() = core?.currentUid()
 
     internal suspend fun core(): ClayverCore =
         core ?: configuring?.await() ?: throw ClayverException.notConfigured()
@@ -198,15 +204,15 @@ public object Clayver {
 
     /**
      * Opens the conversation a Clayver push refers to: the customer chat for
-     * `audience: "customer"` pushes, the agent conversation view for
-     * `audience: "agent"` pushes. Returns false (and does nothing) when [data]
+     * `audience: "customer"` pushes, the built-in support UI in agent mode on
+     * that conversation for `audience: "agent"` pushes. Returns false (and does nothing) when [data]
      * is not a Clayver push or belongs to another workspace.
      */
     public fun handleNotification(context: Context, data: Map<String, String>): Boolean {
         when (val destination = NotificationRouting.destination(data, core?.options?.projectId)) {
             null -> return false
             is PushDestination.CustomerChat -> openChat(context, destination.conversationId)
-            is PushDestination.AgentConversation -> openAgentInbox(context, destination.conversationId)
+            is PushDestination.AgentConversation -> start(context, ClayverChatActivity.agentConversationIntent(context, destination.conversationId))
         }
         return true
     }
@@ -433,16 +439,6 @@ public object Clayver {
         core().unblockCustomer(customerId)
     }
 
-    /**
-     * Opens the built-in agent inbox ([ClayverAgentInboxActivity]), on
-     * [conversationId] when given. Users without a role see a "no access" screen.
-     */
-    public fun openAgentInbox(context: Context, conversationId: String? = null) {
-        val intent = ClayverAgentInboxActivity.intent(context, conversationId)
-        if (context !is Activity) intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-        context.startActivity(intent)
-    }
-
     // endregion
 
     // region UI
@@ -454,6 +450,12 @@ public object Clayver {
      * conversation list if the customer has any conversation, else a new empty
      * chat; with `multipleConversations = false`, the latest open conversation
      * (or a new one).
+     *
+     * Agents ([isAgent]) get a **Switch to support agent** button under **New
+     * conversation** that turns the screen into the team inbox, and a **Switch
+     * to regular user** button there to come back. The choice is remembered per
+     * user on this device, so the next `openChat` (without [conversationId]) or
+     * [openConversations] opens the same side.
      */
     public fun openChat(context: Context, conversationId: String? = null) {
         start(context, ClayverChatActivity.intent(context, conversationId))
@@ -477,7 +479,7 @@ public object Clayver {
     // endregion
 }
 
-private fun Bundle.toStringMap(): Map<String, String> = buildMap {
+internal fun Bundle.toStringMap(): Map<String, String> = buildMap {
     for (key in keySet()) {
         @Suppress("DEPRECATION")
         val value = get(key)

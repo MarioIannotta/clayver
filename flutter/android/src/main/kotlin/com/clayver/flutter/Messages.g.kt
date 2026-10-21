@@ -1199,7 +1199,6 @@ interface ClayverHostApi {
   /** `admin` | `agent`, or `null` for customers. */
   suspend fun agentRole(forceRefresh: Boolean): String?
   suspend fun isAgent(): Boolean
-  suspend fun openAgentInbox(conversationId: String?)
   suspend fun sendAgentReply(conversationId: String, text: String?, attachment: ClayverAttachmentInputDto?): ClayverMessageDto
   /** [status] is `open` or `closed`. */
   suspend fun setConversationStatus(conversationId: String, status: String)
@@ -1558,26 +1557,6 @@ interface ClayverHostApi {
             CoroutineScope(Dispatchers.Main).launch {
               val wrapped: List<Any?> = try {
                 listOf(api.isAgent())
-              } catch (exception: Throwable) {
-                MessagesPigeonUtils.wrapError(exception)
-              }
-              reply.reply(wrapped)
-            }
-          }
-        } else {
-          channel.setMessageHandler(null)
-        }
-      }
-      run {
-        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.clayver.ClayverHostApi.openAgentInbox$separatedMessageChannelSuffix", codec)
-        if (api != null) {
-          channel.setMessageHandler { message, reply ->
-            val args = message as List<Any?>
-            val conversationIdArg = args[0] as String?
-            CoroutineScope(Dispatchers.Main).launch {
-              val wrapped: List<Any?> = try {
-                api.openAgentInbox(conversationIdArg)
-                listOf(null)
               } catch (exception: Throwable) {
                 MessagesPigeonUtils.wrapError(exception)
               }

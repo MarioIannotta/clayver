@@ -35,6 +35,7 @@
     <!-- Conversation list (multiple conversations) -->
     <string name="clayver_loading_conversations">Loading conversations</string>
     <string name="clayver_new_conversation">New conversation</string>
+    <string name="clayver_switch_to_agent">Switch to support agent</string>
     <string name="clayver_conversations_empty">No conversations yet. Start one and we\'ll reply right here.</string>
     <string name="clayver_conversation_attachment">Attachment</string>
     <string name="clayver_conversation_preview_you">You: %1$s</string>
@@ -60,6 +61,7 @@
     <!-- Agent mode -->
     <string name="clayver_agent_inbox_title">Customer inbox</string>
     <string name="clayver_agent_close_inbox">Close inbox</string>
+    <string name="clayver_switch_to_customer">Switch to regular user</string>
     <string name="clayver_agent_tab_open">Open</string>
     <string name="clayver_agent_tab_closed">Closed</string>
     <string name="clayver_agent_empty_open">No open conversations. New customer messages show up here.</string>

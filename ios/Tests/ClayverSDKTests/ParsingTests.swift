@@ -44,6 +44,16 @@ final class ParsingTests: XCTestCase {
         XCTAssertEqual(messages.first?.senderType, .unknown)
     }
 
+    func testInboxEntryUnreadIsABareNumber() {
+        // inbox/{cid}/conversations/{id}.unread is the customer's count (functions/src/conversations.ts).
+        let value: [String: Any] = [
+            "c1": ["status": "open", "updatedAt": NSNumber(value: 100), "unread": NSNumber(value: 3)],
+            "c2": ["status": "open", "updatedAt": NSNumber(value: 50), "unread": NSNumber(value: 0)],
+        ]
+        let conversations = ClayverParsing.conversations(value)
+        XCTAssertEqual(conversations.map(\.unreadCount), [3, 0])
+    }
+
     func testConversationsNewestFirstAndPreferredOpen() {
         let value: [String: Any] = [
             "c1": ["status": "closed", "updatedAt": NSNumber(value: 300), "unread": ["customer": NSNumber(value: 0)]],

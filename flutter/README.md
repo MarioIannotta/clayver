@@ -8,7 +8,7 @@ The plugin is a thin wrapper. Every call goes to the native SDKs:
 
 | Platform | Native SDK | Bridge |
 | --- | --- | --- |
-| iOS 15+ | `ClayverSDK` (Swift package / CocoaPod), facade `Clayver` | `ios/Classes/ClayverPlugin.swift` |
+| iOS 15+ | `ClayverSDK` (Swift package), facade `Clayver` | `ios/Classes/ClayverPlugin.swift` |
 | Android 6+ (API 23) | `com.clayver:clayver-android`, object `com.clayver.sdk.Clayver` | `android/src/main/kotlin/com/clayver/flutter/ClayverPlugin.kt` |
 
 Messaging, push registration, unread counters and the chat UI are native. The
@@ -24,7 +24,7 @@ database rules).
 
 ```yaml
 dependencies:
-  clayver: ^0.2.0
+  clayver: ^0.3.0
   firebase_core: ^5.0.0
   firebase_messaging: ^17.0.0 # for push notifications
 ```
@@ -38,22 +38,17 @@ flutterfire configure   # writes lib/firebase_options.dart and the native config
 
 ### iOS setup
 
-1. Minimum deployment target 15.0. In `ios/Podfile`: `platform :ios, '15.0'`.
-2. Until `ClayverSDK` is published on CocoaPods trunk, point CocoaPods at the
-   repository, inside `target 'Runner' do` and before `flutter_install_all_ios_pods`:
+1. Minimum deployment target 15.0 (*Runner → General → Minimum Deployments*).
+2. The iOS side of the plugin is a Swift package only (no CocoaPods podspec), so
+   enable Flutter's Swift Package Manager support once:
 
-   ```ruby
-   pod 'ClayverSDK', :podspec => 'https://raw.githubusercontent.com/clayver/clayver/v0.1.0/ios/ClayverSDK.podspec'
-   # or, with a local checkout: pod 'ClayverSDK', :path => '<path to clayver>/ios'
+   ```sh
+   flutter config --enable-swift-package-manager
    ```
 
-   The podspec lives in `ios/`, not at the repository root, so a
-   `:git => ...` pod source cannot find it; `:podspec` fetches that file and
-   then checks out the matching `v0.1.0` tag. Once the pod is on trunk, drop
-   this line: the plugin's podspec already depends on `ClayverSDK ~> 0.1.0`.
-
-   The plugin supports CocoaPods only; with Swift Package Manager enabled
-   Flutter still installs it through CocoaPods.
+   Flutter then adds the plugin and the native `ClayverSDK` package
+   (`flutter/ios/clayver/Package.swift`) to the Runner project on the next
+   `flutter run` / `flutter build ios`.
 3. Push notifications (APNs):
    - In Xcode, *Runner → Signing & Capabilities*: add **Push Notifications**
      and **Background Modes → Remote notifications**.
@@ -229,7 +224,6 @@ or uid.
 | --- | --- |
 | `Future<ClayverAgentRole?> agentRole({bool forceRefresh = false})` | `admin`, `agent`, or `null` for customers. `forceRefresh` picks up grants made while the app runs. |
 | `Future<bool> isAgent()` | Whether to show agent features. |
-| `Future<void> openAgentInbox({String? conversationId})` | Open the native agent inbox, optionally on a conversation. |
 | `Stream<List<ClayverAgentConversation>> agentConversations({ClayverConversationStatus status = open, int limit = 50, String? tagId})` | Live workspace inbox, newest activity first; with `tagId`, only conversations with that tag. |
 | `Stream<ClayverCustomerProfile> customerProfile(String customerId)` | Live customer record (`account`, `properties`, `lastSeenAt`, `displayName`). |
 | `Future<ClayverMessage> sendAgentReply({required String conversationId, String? text, ClayverAttachmentInput? attachment})` | Reply as the signed-in agent. |
@@ -243,15 +237,16 @@ or uid.
 | `Future<void> removeTag(String conversationId, String tagId)` | Untag a conversation. |
 
 Agents read messages with the same `messages()` / `loadOlderMessages()`.
-`handleNotification` opens the agent inbox on the conversation for pushes with
-`audience: "agent"` (routing is done by the native SDK), and `setPushToken`
-also registers an agent device when the user is an agent.
+There is no separate entry point for the agent UI: `openChat()` shows agents a
+**Switch to support agent** button under **New conversation**, which turns the
+native screen into the team inbox, and the inbox has **Switch to regular
+user**. The choice is remembered per user on the device, so the next
+`openChat()` (without a conversation id) or `openConversations()` opens the
+same side. `handleNotification` opens the inbox on the conversation for pushes
+with `audience: "agent"` (routing is done by the native SDK), and
+`setPushToken` also registers an agent device when the user is an agent.
 
 ```dart
-if (await Clayver.isAgent()) {
-  await Clayver.openAgentInbox();
-}
-
 // Tags.
 final ClayverTag billing = await Clayver.createTag('Billing');
 await Clayver.addTag(conversationId, billing.id);
@@ -310,8 +305,7 @@ hidden by the plugin.
 - **Notification permission.** iOS always asks. Android asks only on
   Android 13+ (API 33) and only if `POST_NOTIFICATIONS` is in the manifest;
   older Android versions grant it at install time.
-- **`openChat` presentation** (also `openConversations`, `openNewConversation`,
-  `openAgentInbox`). iOS presents the SwiftUI chat **modally** over the
+- **`openChat` presentation** (also `openConversations`, `openNewConversation`). iOS presents the SwiftUI chat **modally** over the
   top-most view controller (the `FlutterViewController` or whatever it is
   presenting); swipe down or *Done* dismisses it. Android starts a separate
   **Activity** from the Activity the plugin is attached to; Back returns to
@@ -331,7 +325,9 @@ hidden by the plugin.
   `Clayver.isClayverNotification` is safe to use there. Do not call `openChat`
   or other APIs from it.
 - **Notification taps.** Forward `onMessageOpenedApp` and `getInitialMessage()`
-  data to `handleNotification`. On iOS a tap during a cold start is remembered
+  data to `handleNotification`. On Android, a tap while the app is in the
+  background opens the native chat directly (no Dart callback fires); when the
+  app was not running, the tap reaches your Flutter activity and these callbacks. On iOS a tap during a cold start is remembered
   by the native SDK and the chat opens once `configure` completes.
 - **One push handler on Android.** `firebase_messaging` registers its own
   `FirebaseMessagingService`. Android delivers each message to a single
@@ -351,8 +347,10 @@ hidden by the plugin.
 For development against this repository (or before the artifacts are
 published):
 
-**iOS**: `pod 'ClayverSDK', :path => '<clayver>/ios'` in the app's Podfile
-(the path is the folder that contains `ClayverSDK.podspec`).
+**iOS**: the plugin's `ios/clayver/Package.swift` resolves `ClayverSDK` from
+the repository URL at a pinned revision. To build against a local checkout,
+point that dependency at it with `.package(path: "<clayver>")` (the folder
+with the root `Package.swift`).
 
 **Android**, option A, Gradle composite build (no publishing). In the app's
 `android/settings.gradle.kts`:

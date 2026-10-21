@@ -13,7 +13,6 @@ import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.app.TaskStackBuilder
 import androidx.core.content.ContextCompat
-import com.clayver.sdk.ClayverAgentInboxActivity
 import com.clayver.sdk.ClayverChatActivity
 import com.clayver.sdk.ClayverNotificationOptions
 import com.clayver.sdk.R
@@ -116,7 +115,7 @@ internal object ClayverNotifications {
         val conversationId = destination.conversationId
         val screen = when (destination) {
             is PushDestination.CustomerChat -> ClayverChatActivity.intent(context, conversationId)
-            is PushDestination.AgentConversation -> ClayverAgentInboxActivity.intent(context, conversationId)
+            is PushDestination.AgentConversation -> ClayverChatActivity.agentConversationIntent(context, conversationId)
         }.setData(Uri.parse(NotificationPayload.linkFor(conversationId))) // distinct per conversation
         val stack = TaskStackBuilder.create(context)
         context.packageManager.getLaunchIntentForPackage(context.packageName)?.let { stack.addNextIntent(it) }

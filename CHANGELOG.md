@@ -11,6 +11,43 @@ listed under **Changed** or **Removed** with upgrade notes.
 
 ## [Unreleased]
 
+## [0.3.0] - 2026-10-21
+
+### Added
+
+- Agents switch sides inside the support UI: `openChat()` shows a **Switch to
+  support agent** button under **New conversation** to users with an agent
+  role, which turns the screen into the team inbox, and the inbox has a
+  **Switch to regular user** button. The choice is remembered per user and
+  workspace on the device (`UserDefaults` / SharedPreferences), so the next
+  `openChat()` without a conversation id opens the same side. Agent pushes
+  open the inbox on their conversation. iOS and Android; Flutter gets it
+  through the native UI.
+
+### Fixed
+
+- Android: tapping a Clayver notification shown while the app was in the
+  background did nothing. Pushes set the click action
+  `CLAYVER_OPEN_CONVERSATION`, which no activity handled; `ClayverChatActivity`
+  now does, opening the conversation (agent pushes: agent mode) and returning
+  into the app on close. Cold starts before `configure` hand the tap to the
+  launcher activity (`Clayver.handleIntent`, Flutter `getInitialMessage`).
+- iOS: the customer's conversation list never showed unread badges. Inbox
+  entries store `unread` as a number, which the parser did not read.
+
+### Removed
+
+- `openAgentInbox()` (iOS, Android, Flutter) and Android's
+  `ClayverAgentInboxActivity`: agents reach the inbox from `openChat()`.
+  `ClayverAgentInboxView` / `ClayverAgentInboxScreen` stay for custom
+  navigation.
+
+- CocoaPods support. The iOS SDK ships through Swift Package Manager only
+  (root `Package.swift`), and the Flutter plugin's iOS side is its Swift
+  package (`flutter/ios/clayver/Package.swift`); Flutter apps need
+  `flutter config --enable-swift-package-manager`. The setup CLI no longer
+  edits Podfiles.
+
 ## [0.2.0] - 2026-10-20
 
 ### Changed
@@ -166,7 +203,8 @@ First public version: the minimum viable product.
 - Example apps for iOS, Android and Flutter, and documentation of the data
   model, SDK API contract, security model, identity verification and push.
 
-[Unreleased]: https://github.com/MarioIannotta/clayver/compare/v0.2.0...HEAD
+[Unreleased]: https://github.com/MarioIannotta/clayver/compare/v0.3.0...HEAD
+[0.3.0]: https://github.com/MarioIannotta/clayver/compare/v0.2.0...v0.3.0
 [0.2.0]: https://github.com/MarioIannotta/clayver/compare/v0.1.1...v0.2.0
 [0.1.1]: https://github.com/MarioIannotta/clayver/compare/v0.1.0...v0.1.1
 [0.1.0]: https://github.com/MarioIannotta/clayver/releases/tag/v0.1.0

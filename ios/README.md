@@ -11,7 +11,7 @@ Functions, Firebase Cloud Messaging).
 - Real-time messages, history paging, unread counts, read receipts, photo attachments,
   push notifications with deep links
 - Agent mode: support staff with an agent/admin role answer customers from the same app
-  (`ClayverAgentInboxView`, `Clayver.openAgentInbox()`), with tags
+  (`Clayver.openChat()` offers agents a switch to the team inbox, `ClayverAgentInboxView`), with tags
 - Depends on `firebase-ios-sdk` 11.x or 12.x: FirebaseAuth, FirebaseDatabase, FirebaseStorage,
   FirebaseFunctions, FirebaseMessaging
 
@@ -30,13 +30,13 @@ The data contract (paths, fields, push payload, callable functions) is
 
 ### Swift Package Manager
 
-The manifest lives in `ios/Package.swift`.
+Swift Package Manager is the only supported installation method (there is no CocoaPods pod).
 
+- **By URL**: Xcode → File → Add Package Dependencies… → enter the repository URL (the
+  manifest is `Package.swift` at the repository root) → add the `ClayverSDK` library to
+  your app target.
 - **Local / monorepo checkout**: Xcode → File → Add Package Dependencies… → **Add Local…** →
-  select the `ios` folder → add the `ClayverSDK` library to your app target.
-- **By URL**: Xcode only resolves a `Package.swift` at the root of a repository. Until a
-  root manifest (or a mirror repository) is published, use the local option or a git
-  submodule.
+  select the `ios` folder (`ios/Package.swift`, the same package for local development).
 
 ```swift
 // In another package's Package.swift
@@ -44,23 +44,6 @@ The manifest lives in `ios/Package.swift`.
 // ...
 .product(name: "ClayverSDK", package: "ClayverSDK")
 ```
-
-### CocoaPods
-
-```ruby
-platform :ios, '15.0'
-use_frameworks! :linkage => :static
-
-target 'MyApp' do
-  pod 'ClayverSDK', :path => '../clayver/ios'
-end
-```
-
-`ClayverSDK.podspec` declares the Firebase pods (`FirebaseAuth`, `FirebaseDatabase`,
-`FirebaseStorage`, `FirebaseFunctions`, `FirebaseMessaging`, `>= 11.0, < 13.0`). Its
-`source_files` pattern works both with `:path => '<repo>/ios'` and for the published pod,
-which the release workflow pushes to CocoaPods trunk from the `v<version>` tag (see
-[docs/releasing.md](../docs/releasing.md)).
 
 ## Firebase setup
 
@@ -324,12 +307,16 @@ running.
 
 ### Showing the inbox
 
-```swift
-if try await Clayver.isAgent() {
-    Clayver.openAgentInbox()                       // UIKit, modal
-}
+There is no separate entry point for agents. `Clayver.openChat()` (and `ClayverSupportView`)
+shows agents a **Switch to support agent** button under **New conversation**, which turns the
+screen into the team inbox; the inbox has a **Switch to regular user** button. The choice is
+remembered per user on the device, so the next `openChat()` (without a `conversationId`) or
+`openConversations()` opens the same side. Agent pushes open the inbox on their conversation.
 
-// SwiftUI
+```swift
+Clayver.openChat()                                 // agents can switch to the inbox from here
+
+// SwiftUI, with your own navigation
 .sheet(isPresented: $showInbox) {
     NavigationView { ClayverAgentInboxView(onClose: { showInbox = false }) }
         .navigationViewStyle(.stack)
@@ -391,8 +378,7 @@ pushes with `audience: "agent"`, and the customer chat for customer pushes as be
 | `Clayver.notes(conversationId:)` / `addNote(_:text:)` / `deleteNote(_:noteId:)` | Internal notes (`ClayverInternalNote`), newest first; immutable, deletable by the author or an admin. |
 | `Clayver.customerConversations(customerId:) -> AsyncThrowingStream<[ClayverAgentConversation], Error>` | All conversations of a customer, newest activity first. |
 | `Clayver.customerBlockStatus(customerId:)` / `blockCustomer(_:reason:until:)` / `unblockCustomer(_:)` | Reads, writes or removes `moderation/{customerId}` (`reason`: spam, abuse or other; `until: nil` lasts until unblocked). |
-| `@MainActor Clayver.openAgentInbox(conversationId:from:)` | Presents the inbox modally, optionally opened on a conversation. |
-| `ClayverAgentInboxView(conversationId:theme:onClose:)` / `ClayverAgentConversationView(conversationId:theme:)` | SwiftUI screens; `viewModel:` initializers take your own `ClayverAgentInboxViewModel` / `ClayverAgentConversationViewModel`. |
+| `ClayverAgentInboxView(conversationId:theme:onClose:onSwitchToCustomer:)` / `ClayverAgentConversationView(conversationId:theme:)` | SwiftUI screens; `viewModel:` initializers take your own `ClayverAgentInboxViewModel` / `ClayverAgentConversationViewModel`. |
 | `Clayver.agentDataSource` | The Firebase-backed `ClayverAgentDataSource` (implement the protocol for previews and tests). |
 
 ## Platform notes

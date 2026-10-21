@@ -3,8 +3,7 @@ import SwiftUI
 import UIKit
 import QuickLook
 
-/// Presents the chat or the agent inbox modally from UIKit (`Clayver.openChat`,
-/// `Clayver.openAgentInbox`).
+/// Presents the support UI modally from UIKit (`Clayver.openChat` and friends, agent pushes).
 @available(iOSApplicationExtension, unavailable)
 @MainActor
 enum ClayverPresenter {
@@ -33,13 +32,11 @@ enum ClayverPresenter {
         present(root, close: close, from: viewController, caller: caller)
     }
 
-    static func presentAgentInbox(conversationId: String?, from viewController: UIViewController?) {
+    /// An agent push: the support UI in agent mode with the conversation pushed over the inbox.
+    static func presentAgentConversation(_ conversationId: String) {
         let close = CloseAction()
-        let root = NavigationView {
-            ClayverAgentInboxView(conversationId: conversationId, onClose: { close.run() })
-        }
-        .navigationViewStyle(.stack)
-        present(root, close: close, from: viewController, caller: "openAgentInbox")
+        let root = ClayverSupportView(entry: .list, agentConversationId: conversationId, onClose: { close.run() })
+        present(root, close: close, from: nil, caller: "handleNotification")
     }
 
     private static func present<Root: View>(_ root: Root, close: CloseAction, from viewController: UIViewController?, caller: String) {

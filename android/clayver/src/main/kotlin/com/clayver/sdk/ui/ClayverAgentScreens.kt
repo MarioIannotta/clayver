@@ -52,6 +52,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Tab
@@ -119,6 +120,8 @@ import java.util.Date
  * @param onClose shows a close button in the toolbar when set.
  * @param onOpenConversation handle navigation yourself (e.g. with your NavHost)
  *   and show [ClayverAgentConversationScreen] for the id.
+ * @param onSwitchToCustomer shows a **Switch to regular user** button at the
+ *   bottom when set. [Clayver.openChat] sets it.
  */
 @Composable
 public fun ClayverAgentInboxScreen(
@@ -127,6 +130,7 @@ public fun ClayverAgentInboxScreen(
     theme: ClayverTheme = Clayver.theme,
     onClose: (() -> Unit)? = null,
     onOpenConversation: ((conversationId: String) -> Unit)? = null,
+    onSwitchToCustomer: (() -> Unit)? = null,
 ) {
     var openId by rememberSaveable(initialConversationId) { mutableStateOf(initialConversationId) }
     val current = openId
@@ -149,6 +153,7 @@ public fun ClayverAgentInboxScreen(
             vm = vm,
             onClose = onClose,
             onOpen = { id -> if (onOpenConversation != null) onOpenConversation(id) else openId = id },
+            onSwitchToCustomer = onSwitchToCustomer,
             modifier = modifier,
         )
     }
@@ -161,6 +166,7 @@ private fun AgentInboxContent(
     vm: AgentInboxViewModel,
     onClose: (() -> Unit)?,
     onOpen: (String) -> Unit,
+    onSwitchToCustomer: (() -> Unit)?,
     modifier: Modifier,
 ) {
     val colors = LocalClayverColors.current
@@ -202,6 +208,22 @@ private fun AgentInboxContent(
                 InboxPhase.Loading -> LoadingState()
                 is InboxPhase.Failed -> AgentErrorState(phase.error, onRetry = vm::retry)
                 InboxPhase.Ready -> if (state.isEmpty) InboxEmptyState(state.tab, state.tagFilter != null) else InboxList(state.rows, onOpen)
+            }
+        }
+        if (onSwitchToCustomer != null) {
+            Surface(color = colors.surface, shadowElevation = 4.dp) {
+                OutlinedButton(
+                    onClick = onSwitchToCustomer,
+                    colors = ButtonDefaults.outlinedButtonColors(contentColor = colors.accent),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .navigationBarsPadding()
+                        .padding(horizontal = 16.dp, vertical = 12.dp),
+                ) {
+                    Icon(Icons.Filled.Person, contentDescription = null)
+                    Spacer(Modifier.width(8.dp))
+                    Text(stringResource(R.string.clayver_switch_to_customer))
+                }
             }
         }
     }

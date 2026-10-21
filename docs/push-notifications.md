@@ -35,7 +35,9 @@ Registrations that haven't been refreshed for 270 days are pruned daily.
 ```
 
 Pass incoming notifications to `Clayver.handleNotification(...)`. It returns
-`true` for Clayver pushes and opens the conversation. Android uses the
+`true` for Clayver pushes and opens the conversation. On Android, pushes shown by
+the system carry the click action `CLAYVER_OPEN_CONVERSATION`, handled by the
+SDK's `ClayverChatActivity`, so background taps open the conversation directly. Android uses the
 `clayver_messages` notification channel and tags notifications by
 conversation, so updates replace each other instead of stacking.
 

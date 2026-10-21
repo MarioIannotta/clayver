@@ -329,9 +329,6 @@ abstract class ClayverHostApi {
   bool isAgent();
 
   @async
-  void openAgentInbox(String? conversationId);
-
-  @async
   ClayverMessageDto sendAgentReply(
     String conversationId,
     String? text,

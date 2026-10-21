@@ -4,7 +4,7 @@
 //   node scripts/version.mjs <new-version> [--dry-run] [--date YYYY-MM-DD]
 //
 // Updates every source listed in scripts/version-sources.mjs (npm packages,
-// podspecs, pubspec, Gradle, the Swift/TypeScript version constants, the CLI's
+// pubspec, Gradle, the Swift/TypeScript version constants, the CLI's
 // SDK coordinates and the install snippets in docs), then moves the
 // "## [Unreleased]" section of CHANGELOG.md under "## [<new-version>] - <date>".
 // Run scripts/check-versions.mjs afterwards (it runs in CI and on release).

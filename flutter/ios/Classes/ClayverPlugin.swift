@@ -160,11 +160,6 @@ extension ClayverPlugin: ClayverHostApi {
     try await bridge { try await Clayver.isAgent() }
   }
 
-  func openAgentInbox(conversationId: String?) async throws {
-    // Presents modally over the top-most view controller, like openChat.
-    await Clayver.openAgentInbox(conversationId: conversationId, from: nil)
-  }
-
   func sendAgentReply(conversationId: String, text: String?, attachment: ClayverAttachmentInputDto?) async throws -> ClayverMessageDto {
     try await bridge {
       let input = try attachment.map(Self.attachmentInput)

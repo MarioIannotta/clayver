@@ -1151,7 +1151,6 @@ protocol ClayverHostApi {
   /// `admin` | `agent`, or `null` for customers.
   func agentRole(forceRefresh: Bool) async throws -> String?
   func isAgent() async throws -> Bool
-  func openAgentInbox(conversationId: String?) async throws
   func sendAgentReply(conversationId: String, text: String?, attachment: ClayverAttachmentInputDto?) async throws -> ClayverMessageDto
   /// [status] is `open` or `closed`.
   func setConversationStatus(conversationId: String, status: String) async throws
@@ -1474,23 +1473,6 @@ class ClayverHostApiSetup {
       }
     } else {
       isAgentChannel.setMessageHandler(nil)
-    }
-    let openAgentInboxChannel = FlutterBasicMessageChannel(name: "dev.flutter.pigeon.clayver.ClayverHostApi.openAgentInbox\(channelSuffix)", binaryMessenger: binaryMessenger, codec: codec)
-    if let api = api {
-      openAgentInboxChannel.setMessageHandler { message, reply in
-        let args = message as! [Any?]
-        let conversationIdArg: String? = nilOrValue(args[0])
-        Task { @MainActor in
-          do {
-            try await api.openAgentInbox(conversationId: conversationIdArg)
-            reply(wrapResult(nil))
-          } catch {
-            reply(wrapError(error))
-          }
-        }
-      }
-    } else {
-      openAgentInboxChannel.setMessageHandler(nil)
     }
     let sendAgentReplyChannel = FlutterBasicMessageChannel(name: "dev.flutter.pigeon.clayver.ClayverHostApi.sendAgentReply\(channelSuffix)", binaryMessenger: binaryMessenger, codec: codec)
     if let api = api {
