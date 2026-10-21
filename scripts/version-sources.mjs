@@ -90,6 +90,16 @@ export const SOURCES = [
     patterns: [{ name: "version", re: new RegExp(`^(version:[ \\t]*)${V}([ \\t]*)$`, "m"), render: exact }],
   },
   {
+    file: "flutter/ios/clayver/Package.swift",
+    patterns: [
+      {
+        name: "native SDK tag",
+        re: new RegExp(`(MarioIannotta/clayver\\.git", exact: ")${V}(")`),
+        render: exact,
+      },
+    ],
+  },
+  {
     file: "flutter/android/build.gradle",
     patterns: [
       { name: "version", re: new RegExp(`^(version = ")${V}(")`, "m"), render: exact },

@@ -10,7 +10,7 @@ import { ClayverError, toClayverError } from "./errors.js";
 import { DEVICE_ID_PATTERN } from "./paths.js";
 import type { AgentSettings, ClayverPushData, Unsubscribe } from "./types.js";
 
-export const SDK_VERSION = "0.3.0";
+export const SDK_VERSION = "0.3.1";
 const DEVICE_ID_STORAGE_KEY = "clayver.deviceId";
 const DEVICE_ID_ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789_-";
 

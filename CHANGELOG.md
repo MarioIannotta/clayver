@@ -11,6 +11,15 @@ listed under **Changed** or **Removed** with upgrade notes.
 
 ## [Unreleased]
 
+## [0.3.1] - 2026-10-21
+
+### Fixed
+
+- Flutter iOS: the plugin's Swift package depended on the native SDK as
+  package `ClayverSDK`. A URL dependency's identity is the repository name
+  (`clayver`), so package resolution failed. The product now uses
+  `package: "clayver"`.
+
 ## [0.3.0] - 2026-10-21
 
 ### Added
@@ -203,7 +212,8 @@ First public version: the minimum viable product.
 - Example apps for iOS, Android and Flutter, and documentation of the data
   model, SDK API contract, security model, identity verification and push.
 
-[Unreleased]: https://github.com/MarioIannotta/clayver/compare/v0.3.0...HEAD
+[Unreleased]: https://github.com/MarioIannotta/clayver/compare/v0.3.1...HEAD
+[0.3.1]: https://github.com/MarioIannotta/clayver/compare/v0.3.0...v0.3.1
 [0.3.0]: https://github.com/MarioIannotta/clayver/compare/v0.2.0...v0.3.0
 [0.2.0]: https://github.com/MarioIannotta/clayver/compare/v0.1.1...v0.2.0
 [0.1.1]: https://github.com/MarioIannotta/clayver/compare/v0.1.0...v0.1.1

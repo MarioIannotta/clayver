@@ -1,6 +1,6 @@
 {
   "name": "clayver",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "description": "Set up Clayver in-app customer support in your own Firebase project: `npx clayver init`.",
   "license": "Apache-2.0",
   "repository": {
