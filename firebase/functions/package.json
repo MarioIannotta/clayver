@@ -1,6 +1,6 @@
 {
   "name": "@clayver/functions",
-  "version": "0.3.1",
+  "version": "0.3.3",
   "private": true,
   "description": "Clayver Cloud Functions: roles, message fan-out, unread counters and push notifications.",
   "license": "Apache-2.0",

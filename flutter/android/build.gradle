@@ -1,14 +1,9 @@
 // Android side of the Clayver Flutter plugin: a thin bridge over the native
-// Clayver Android SDK (`com.clayver:clayver-android`).
-//
-// The release AAR is published into ./repo so app projects resolve it from
-// this package. Maven Central is used once `com.clayver:clayver-android` is
-// there; until then the bundled repo is what a normal app build uses.
+// Clayver Android SDK (`com.marioiannotta.clayver:clayver-android`), which
+// app projects resolve from Maven Central.
 
 group = "com.clayver.flutter"
-version = "0.3.1"
-
-def bundledSdkRepo = new File(projectDir, "repo")
+version = "0.3.3"
 
 buildscript {
     ext.kotlin_version = "2.1.21"
@@ -26,9 +21,6 @@ rootProject.allprojects {
     repositories {
         google()
         mavenCentral()
-        if (bundledSdkRepo.isDirectory()) {
-            maven { url = bundledSdkRepo }
-        }
     }
 }
 
@@ -66,9 +58,9 @@ tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).configureEach {
     }
 }
 
-def clayverAndroidVersion = project.findProperty("clayver.androidSdkVersion") ?: "0.3.1"
+def clayverAndroidVersion = project.findProperty("clayver.androidSdkVersion") ?: "0.3.3"
 
 dependencies {
-    implementation("com.clayver:clayver-android:$clayverAndroidVersion")
+    implementation("com.marioiannotta.clayver:clayver-android:$clayverAndroidVersion")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.9.0")
 }

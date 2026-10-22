@@ -1,6 +1,6 @@
 {
   "name": "@clayver/core",
-  "version": "0.3.1",
+  "version": "0.3.3",
   "description": "Typed data model and framework-agnostic Firebase data-access layer for Clayver agent dashboards.",
   "license": "Apache-2.0",
   "repository": {

@@ -11,6 +11,47 @@ listed under **Changed** or **Removed** with upgrade notes.
 
 ## [Unreleased]
 
+## [0.3.3] - 2026-10-22
+
+0.3.2 reached Maven Central only (the Android SDK). This release is the first
+to ship its changes to pub.dev, npm and Swift Package Manager as well.
+
+### Added
+
+- Releases are published by one tag. Pushing `v<version>` runs
+  `.github/workflows/release.yml`, which checks that every version source
+  matches the tag and publishes the Android SDK to Maven Central, the Flutter
+  plugin to pub.dev and the `clayver` CLI to npm, then creates the GitHub
+  Release from this changelog. npm and pub.dev use trusted publishing (no
+  stored tokens). See `docs/releasing.md`.
+
+### Changed
+
+- The example apps (`examples/android`, `examples/flutter`) build the Android
+  SDK from this repository through `clayver.localSdk=true` in their
+  `gradle.properties`. Remove that line to build against the version on
+  Maven Central.
+- Android publishing also accepts Gradle's own `signing.keyId`,
+  `signing.password` and `signing.secretKeyRingFile` properties for local
+  releases.
+
+## [0.3.2] - 2026-10-21
+
+### Changed
+
+- Android: the SDK's Maven coordinates are now
+  `com.marioiannotta.clayver:clayver-android`, published to Maven Central
+  (`com.clayver` could not be registered there). Replace
+  `com.clayver:clayver-android` in your Gradle files. The Kotlin package
+  (`com.clayver.sdk`) is unchanged.
+
+### Fixed
+
+- Flutter Android: the plugin resolved the native SDK from a Maven repository
+  bundled in the package that only held 0.1.0, so app builds failed with
+  "Could not find com.clayver:clayver-android". The plugin now uses Maven
+  Central and no longer bundles the SDK.
+
 ## [0.3.1] - 2026-10-21
 
 ### Fixed
@@ -212,7 +253,9 @@ First public version: the minimum viable product.
 - Example apps for iOS, Android and Flutter, and documentation of the data
   model, SDK API contract, security model, identity verification and push.
 
-[Unreleased]: https://github.com/MarioIannotta/clayver/compare/v0.3.1...HEAD
+[Unreleased]: https://github.com/MarioIannotta/clayver/compare/v0.3.3...HEAD
+[0.3.3]: https://github.com/MarioIannotta/clayver/compare/v0.3.2...v0.3.3
+[0.3.2]: https://github.com/MarioIannotta/clayver/compare/v0.3.1...v0.3.2
 [0.3.1]: https://github.com/MarioIannotta/clayver/compare/v0.3.0...v0.3.1
 [0.3.0]: https://github.com/MarioIannotta/clayver/compare/v0.2.0...v0.3.0
 [0.2.0]: https://github.com/MarioIannotta/clayver/compare/v0.1.1...v0.2.0

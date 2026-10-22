@@ -1,0 +1,153 @@
+# Publishes a release from a `v<version>` tag. See docs/releasing.md for what
+# each job does and the secrets and variables it needs.
+name: Release
+
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  preflight:
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.meta.outputs.version }}
+      prerelease: ${{ steps.meta.outputs.prerelease }}
+      maven: ${{ steps.meta.outputs.maven }}
+      npm: ${{ steps.meta.outputs.npm }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Check versions and changelog
+        run: |
+          node scripts/check-versions.mjs --tag "$GITHUB_REF_NAME"
+          node scripts/changelog-section.mjs "$GITHUB_REF_NAME" > /dev/null
+      - id: meta
+        env:
+          MAVEN_CENTRAL_USERNAME: ${{ secrets.MAVEN_CENTRAL_USERNAME }}
+          MAVEN_CENTRAL_PASSWORD: ${{ secrets.MAVEN_CENTRAL_PASSWORD }}
+          SIGNING_KEY: ${{ secrets.SIGNING_KEY }}
+          NPM_PUBLISH: ${{ vars.NPM_PUBLISH }}
+        run: |
+          version="${GITHUB_REF_NAME#v}"
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+          if [[ "$version" == *-* ]]; then echo "prerelease=true" >> "$GITHUB_OUTPUT"; else echo "prerelease=false" >> "$GITHUB_OUTPUT"; fi
+          if [[ -n "$MAVEN_CENTRAL_USERNAME" && -n "$MAVEN_CENTRAL_PASSWORD" && -n "$SIGNING_KEY" ]]; then
+            echo "maven=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "maven=false" >> "$GITHUB_OUTPUT"
+            echo "::notice::Maven Central secrets are not set; skipping the Android SDK."
+          fi
+          if [[ "$NPM_PUBLISH" == "true" ]]; then
+            echo "npm=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "npm=false" >> "$GITHUB_OUTPUT"
+            echo "::notice::The NPM_PUBLISH variable is not true; skipping npm."
+          fi
+
+  maven:
+    needs: preflight
+    if: needs.preflight.outputs.maven == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+      - uses: gradle/actions/setup-gradle@v4
+      - name: Publish com.marioiannotta.clayver:clayver-android to Maven Central
+        working-directory: android
+        env:
+          ORG_GRADLE_PROJECT_mavenCentralUsername: ${{ secrets.MAVEN_CENTRAL_USERNAME }}
+          ORG_GRADLE_PROJECT_mavenCentralPassword: ${{ secrets.MAVEN_CENTRAL_PASSWORD }}
+          ORG_GRADLE_PROJECT_signingInMemoryKey: ${{ secrets.SIGNING_KEY }}
+          ORG_GRADLE_PROJECT_signingInMemoryKeyPassword: ${{ secrets.SIGNING_KEY_PASSWORD }}
+          ORG_GRADLE_PROJECT_signingInMemoryKeyId: ${{ secrets.SIGNING_KEY_ID }}
+        run: ./gradlew :clayver:publishAndReleaseToMavenCentral --no-configuration-cache
+
+  pub:
+    needs: [preflight, maven]
+    # The plugin depends on the Android SDK, so it waits for `maven`, but still
+    # runs when `maven` was skipped.
+    if: ${{ !cancelled() && vars.PUB_DEV_PUBLISH == 'true' && needs.preflight.result == 'success' && needs.maven.result != 'failure' }}
+    runs-on: ubuntu-latest
+    environment: pub.dev
+    permissions:
+      id-token: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dart-lang/setup-dart@v1
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+      - name: Publish the Flutter plugin to pub.dev
+        working-directory: flutter
+        run: |
+          cp ../LICENSE ../CHANGELOG.md .
+          flutter pub get
+          flutter pub publish --force
+
+  npm:
+    needs: preflight
+    if: needs.preflight.outputs.npm == 'true'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm turbo run build --filter=clayver
+      # Trusted publishing (OIDC, no token) needs npm 11.5.1 or later.
+      - run: npm install -g npm@11.6.2
+      - name: Publish clayver
+        env:
+          VERSION: ${{ needs.preflight.outputs.version }}
+          DIST_TAG: ${{ needs.preflight.outputs.prerelease == 'true' && 'next' || 'latest' }}
+        run: |
+          # @clayver/core is bundled into the dashboard and not published.
+          for dir in packages/setup; do
+            name=$(node -p "require('./$dir/package.json').name")
+            if npm view "$name@$VERSION" version > /dev/null 2>&1; then
+              echo "::notice::$name@$VERSION is already on npm; skipping."
+              continue
+            fi
+            # pnpm pack rewrites workspace: dependencies; npm publish authenticates
+            # through the package's trusted publisher and adds provenance.
+            dest=$(mktemp -d)
+            (cd "$dir" && pnpm pack --pack-destination "$dest" > /dev/null)
+            tarball=$(ls "$dest"/*.tgz)
+            npm publish "$tarball" --access public --provenance --tag "$DIST_TAG"
+          done
+
+  github-release:
+    needs: [preflight, maven, pub, npm]
+    if: ${{ !cancelled() && needs.preflight.result == 'success' }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: node scripts/changelog-section.mjs "$GITHUB_REF_NAME" > release-notes.md
+      - uses: softprops/action-gh-release@v2
+        with:
+          name: ${{ github.ref_name }}
+          body_path: release-notes.md
+          prerelease: ${{ needs.preflight.outputs.prerelease == 'true' }}

@@ -38,20 +38,20 @@ export const EXAMPLE_DIR = "clayver-example";
  * Keep in sync with the published iOS / Android / Flutter packages.
  */
 export const SDK = {
-  version: "0.3.1",
+  version: "0.3.3",
   ios: {
     spmUrl: "https://github.com/MarioIannotta/clayver",
     spmProduct: "ClayverSDK",
     module: "ClayverSDK",
   },
   android: {
-    coordinates: "com.clayver:clayver-android",
-    version: "0.3.1",
+    coordinates: "com.marioiannotta.clayver:clayver-android",
+    version: "0.3.3",
     packageName: "com.clayver.sdk",
   },
   flutter: {
     package: "clayver",
-    version: "^0.3.1",
+    version: "^0.3.3",
   },
 } as const;
 

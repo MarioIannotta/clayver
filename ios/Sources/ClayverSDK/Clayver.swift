@@ -19,7 +19,7 @@ import UIKit
 /// try Auth.auth().signOut()
 /// ```
 public enum Clayver {
-    public static let sdkVersion = "0.3.1"
+    public static let sdkVersion = "0.3.3"
 
     // MARK: - State
 

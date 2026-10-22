@@ -12,12 +12,10 @@ workflow does and the one-time setup of each registry.
 | Job | Publishes | Needs | Skipped (with a notice) when |
 | --- | --- | --- | --- |
 | `preflight` | Checks the tag against every version source (`scripts/check-versions.mjs --tag`) and that `CHANGELOG.md` has a section for it. Fails the release on any mismatch. | | never |
-| `ci` | Runs the whole CI pipeline (`ci.yml`): TypeScript build/typecheck/lint/test, emulator tests, Flutter, Android and iOS tests. | | never |
-| `dashboard` | Builds the dashboard without project config and packs `clayver-dashboard-<version>.tar.gz` (+ `.sha256`). | | never |
-| `npm` | `@clayver/core` and `clayver` (packages/setup) with [provenance](https://docs.npmjs.com/generating-provenance-statements). Pre-releases use the dist-tag `next`. Already-published versions are skipped. | secret `NPM_TOKEN` | `NPM_TOKEN` is not set |
-| `maven` | `com.clayver:clayver-android` to Maven Central through the Central Portal (`publishAndReleaseToMavenCentral`, [vanniktech maven-publish](https://vanniktech.github.io/gradle-maven-publish-plugin/)), signed with an in-memory GPG key. | secrets `MAVEN_CENTRAL_USERNAME`, `MAVEN_CENTRAL_PASSWORD`, `SIGNING_KEY`, `SIGNING_KEY_PASSWORD`, optional `SIGNING_KEY_ID` | any of the first three is not set |
+| `npm` | `clayver` (packages/setup) with [provenance](https://docs.npmjs.com/generating-provenance-statements). Pre-releases use the dist-tag `next`. Already-published versions are skipped. | repository variable `NPM_PUBLISH=true`, a trusted publisher on the package | the variable is not `true` |
+| `maven` | `com.marioiannotta.clayver:clayver-android` to Maven Central through the Central Portal (`publishAndReleaseToMavenCentral`, [vanniktech maven-publish](https://vanniktech.github.io/gradle-maven-publish-plugin/)), signed with an in-memory GPG key. | secrets `MAVEN_CENTRAL_USERNAME`, `MAVEN_CENTRAL_PASSWORD`, `SIGNING_KEY`, `SIGNING_KEY_PASSWORD`, optional `SIGNING_KEY_ID` | any of the first three is not set |
 | `pub` | The Flutter plugin (`flutter/`) to pub.dev with OIDC automated publishing. Runs after `maven` (the plugin depends on the Android SDK) unless it failed. Its iOS side is a Swift package that resolves `ClayverSDK` from this repository. | repository variable `PUB_DEV_PUBLISH=true`, environment `pub.dev` | the variable is not `true` |
-| `github-release` | A GitHub Release named after the tag, with the changelog section, install snippets and the dashboard tarball. Marked as a pre-release for `-beta`/`-rc` versions. | the built-in `GITHUB_TOKEN` | never |
+| `github-release` | A GitHub Release named after the tag, with the changelog section. Marked as a pre-release for `-beta`/`-rc` versions. | the built-in `GITHUB_TOKEN` | never |
 
 Swift Package Manager needs nothing: the root `Package.swift` is resolved from
 the tag (SwiftPM accepts the `v` prefix). It is the only iOS distribution;
@@ -35,27 +33,32 @@ and variables → Actions**.
 
 | Name | Kind | Value |
 | --- | --- | --- |
-| `NPM_TOKEN` | secret | An npm granular access token with read and write access to the `clayver` package and the `@clayver` scope. |
 | `MAVEN_CENTRAL_USERNAME` | secret | Username of a Central Portal **user token** (not your login). |
 | `MAVEN_CENTRAL_PASSWORD` | secret | Password of that user token. |
 | `SIGNING_KEY` | secret | ASCII-armored GPG private key: `gpg --export-secret-keys --armor <key id>`. |
 | `SIGNING_KEY_PASSWORD` | secret | The key's passphrase (leave unset if it has none). |
 | `SIGNING_KEY_ID` | secret, optional | The last 8 hex characters of the key id, if the export holds several keys. |
+| `NPM_PUBLISH` | variable | `true` once npm trusted publishing is set up for the `clayver` package. |
 | `PUB_DEV_PUBLISH` | variable | `true` once pub.dev automated publishing is set up. |
 
 ## One-time registry setup
 
-### npm
+### npm (trusted publishing, no token)
 
-1. Create the npm organization `clayver` (for the `@clayver` scope) and make
-   sure the unscoped package name `clayver` belongs to it or to a maintainer.
-2. Create a granular access token (Access Tokens → Generate New Token →
-   Granular) with **Read and write** on the packages and scope above, and
-   store it as `NPM_TOKEN`.
-3. Provenance needs a public GitHub repository and the `repository` field in
-   each published `package.json`, which points at `github.com/MarioIannotta/clayver`.
-   If the repository lives elsewhere, update that field in
-   `packages/setup/package.json` and `packages/core/package.json`.
+npm publishes from GitHub Actions through [trusted publishing](https://docs.npmjs.com/trusted-publishers):
+the workflow proves its identity with an OIDC token, so there is no secret to
+store or rotate, and provenance is added automatically.
+
+1. Sign in as a maintainer of the `clayver` package.
+2. On npmjs.com, open the `clayver` package's **Settings** tab (visible to
+   maintainers) → **Trusted Publisher** → **GitHub Actions**, with organization
+   or user `MarioIannotta`, repository `clayver` and workflow filename
+   `release.yml`. Optionally set **Publishing access** to require 2FA and
+   disallow tokens.
+3. Set the repository variable `NPM_PUBLISH` to `true`.
+4. Provenance needs a public GitHub repository and the `repository` field in
+   `packages/setup/package.json`, which points at `github.com/MarioIannotta/clayver`.
+   If the repository lives elsewhere, update that field.
 
 ### pub.dev (OIDC, no secret)
 
@@ -83,11 +86,11 @@ matches the pattern and the version in `pubspec.yaml`.
 ### Maven Central
 
 1. Sign in to the [Central Portal](https://central.sonatype.com) and register
-   the namespace `com.clayver`. Central verifies it with a DNS TXT record on
-   `clayver.com`. If the project controls a different domain, change the
+   the namespace `com.marioiannotta` (the SDK's group is
+   `com.marioiannotta.clayver`, which the namespace covers). Central verifies
+   it with a DNS TXT record on `marioiannotta.com`. To use another domain, change the
    group (`group` and `coordinates(...)` in `android/clayver/build.gradle.kts`,
-   `SDK.android.coordinates` in the CLI, and the docs) to match before the first
-   release, or use `io.github.<org>`.
+   `SDK.android.coordinates` in the CLI, and the docs) to match.
 2. **Account → Generate User Token**; store the username and password as
    `MAVEN_CENTRAL_USERNAME` and `MAVEN_CENTRAL_PASSWORD`.
 3. Create a signing key and publish its public part:

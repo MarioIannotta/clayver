@@ -13,8 +13,10 @@ A minimal app that uses the [`clayver`](../../flutter) plugin:
 - `Clayver.openChat` and notification taps through `Clayver.handleNotification`
 
 On iOS the plugin's Swift package (`flutter/ios/clayver/Package.swift`) brings
-in the native `ClayverSDK` package; `android/settings.gradle.kts` substitutes
-`com.clayver:clayver-android` with the `../../../android` Gradle build.
+in the native `ClayverSDK` package. On Android the plugin pulls
+`com.marioiannotta.clayver:clayver-android` from Maven Central; add
+`clayver.localSdk=true` to `android/gradle.properties` to build it from
+`../../../android` instead.
 
 ## Prerequisites
 

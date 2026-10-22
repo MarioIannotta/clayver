@@ -25,11 +25,14 @@ dependencyResolutionManagement {
 
 rootProject.name = "clayver-android-example"
 
-// Builds the SDK from source: `com.clayver:clayver-android` is substituted by ../../android/clayver.
-// In your own app, depend on the published artifact instead.
-includeBuild("../../android") {
-    dependencySubstitution {
-        substitute(module("com.clayver:clayver-android")).using(project(":clayver"))
+// The app depends on `com.marioiannotta.clayver:clayver-android` from Maven Central,
+// like any app would. To build the SDK from this repository instead, run Gradle
+// with -Pclayver.localSdk=true (or set it in gradle.properties).
+if (providers.gradleProperty("clayver.localSdk").orNull == "true") {
+    includeBuild("../../android") {
+        dependencySubstitution {
+            substitute(module("com.marioiannotta.clayver:clayver-android")).using(project(":clayver"))
+        }
     }
 }
 

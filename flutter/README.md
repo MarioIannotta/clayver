@@ -9,7 +9,7 @@ The plugin is a thin wrapper. Every call goes to the native SDKs:
 | Platform | Native SDK | Bridge |
 | --- | --- | --- |
 | iOS 15+ | `ClayverSDK` (Swift package), facade `Clayver` | `ios/Classes/ClayverPlugin.swift` |
-| Android 6+ (API 23) | `com.clayver:clayver-android`, object `com.clayver.sdk.Clayver` | `android/src/main/kotlin/com/clayver/flutter/ClayverPlugin.kt` |
+| Android 6+ (API 23) | `com.marioiannotta.clayver:clayver-android`, object `com.clayver.sdk.Clayver` | `android/src/main/kotlin/com/clayver/flutter/ClayverPlugin.kt` |
 
 Messaging, push registration, unread counters and the chat UI are native. The
 chat screens opened by `Clayver.openChat()`, `openConversations()` and
@@ -24,7 +24,7 @@ database rules).
 
 ```yaml
 dependencies:
-  clayver: ^0.3.1
+  clayver: ^0.3.3
   firebase_core: ^5.0.0
   firebase_messaging: ^17.0.0 # for push notifications
 ```
@@ -62,8 +62,9 @@ flutterfire configure   # writes lib/firebase_options.dart and the native config
 ### Android setup
 
 1. `minSdk` 23 or higher.
-2. Add the dependency source. Until `com.clayver:clayver-android` is on Maven
-   Central, use one of the options in [Using a local native SDK](#using-a-local-native-sdk).
+2. Nothing to add for the native SDK: `com.marioiannotta.clayver:clayver-android`
+   comes from Maven Central. To build against a local checkout instead, see
+   [Using a local native SDK](#using-a-local-native-sdk).
 3. Android 13+ needs the `POST_NOTIFICATIONS` runtime permission. Add
    `<uses-permission android:name="android.permission.POST_NOTIFICATIONS" />` to
    `AndroidManifest.xml` and call `FirebaseMessaging.instance.requestPermission()`.
@@ -358,7 +359,7 @@ with the root `Package.swift`).
 ```kotlin
 includeBuild("<clayver>/android") {
     dependencySubstitution {
-        substitute(module("com.clayver:clayver-android")).using(project(":clayver"))
+        substitute(module("com.marioiannotta.clayver:clayver-android")).using(project(":clayver"))
     }
 }
 ```

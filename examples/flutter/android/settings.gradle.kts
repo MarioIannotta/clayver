@@ -25,12 +25,13 @@ plugins {
 
 include(":app")
 
-// Build the native Clayver Android SDK from this repository instead of
-// downloading `com.clayver:clayver-android` from Maven. Apps outside the
-// repository point this at their checkout of clayver/android, or remove it
-// once the artifact is published.
-includeBuild("../../../android") {
-    dependencySubstitution {
-        substitute(module("com.clayver:clayver-android")).using(project(":clayver"))
+// The plugin pulls `com.marioiannotta.clayver:clayver-android` from Maven Central.
+// To build the native SDK from this repository instead, run with
+// -Pclayver.localSdk=true (or set it in gradle.properties).
+if (providers.gradleProperty("clayver.localSdk").orNull == "true") {
+    includeBuild("../../../android") {
+        dependencySubstitution {
+            substitute(module("com.marioiannotta.clayver:clayver-android")).using(project(":clayver"))
+        }
     }
 }

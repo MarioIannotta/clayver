@@ -7,8 +7,8 @@ plugins {
     alias(libs.plugins.vanniktech.maven.publish)
 }
 
-group = "com.clayver"
-version = "0.3.1"
+group = "com.marioiannotta.clayver"
+version = "0.3.3"
 
 android {
     namespace = "com.clayver.sdk"
@@ -72,20 +72,22 @@ dependencies {
 // Publishing (com.vanniktech.maven.publish). The plugin configures the "release"
 // variant with sources and javadoc jars.
 //
-//   ./gradlew :clayver:publishToMavenLocal               -> ~/.m2, com.clayver:clayver-android:<version>
+//   ./gradlew :clayver:publishToMavenLocal               -> ~/.m2, com.marioiannotta.clayver:clayver-android:<version>
 //   ./gradlew :clayver:publishAndReleaseToMavenCentral   -> Maven Central (release workflow)
 //
 // Maven Central needs these Gradle properties, which CI passes as
 // ORG_GRADLE_PROJECT_<name> environment variables (see docs/releasing.md):
 // mavenCentralUsername, mavenCentralPassword (a Central Portal user token),
 // signingInMemoryKey (ASCII-armored GPG private key), signingInMemoryKeyPassword
-// and optionally signingInMemoryKeyId. Without a signing key, publications are
-// left unsigned so local and composite builds keep working.
+// and optionally signingInMemoryKeyId. Gradle's own signing.keyId, signing.password
+// and signing.secretKeyRingFile (e.g. in ~/.gradle/gradle.properties) work too.
+// Without a signing key, publications are left unsigned so local and composite
+// builds keep working.
 mavenPublishing {
     configure(AndroidSingleVariantLibrary(variant = "release", sourcesJar = true, publishJavadocJar = true))
-    coordinates("com.clayver", "clayver-android", project.version.toString())
+    coordinates("com.marioiannotta.clayver", "clayver-android", project.version.toString())
     publishToMavenCentral()
-    if (providers.gradleProperty("signingInMemoryKey").isPresent) {
+    if (providers.gradleProperty("signingInMemoryKey").isPresent || providers.gradleProperty("signing.keyId").isPresent) {
         signAllPublications()
     }
 

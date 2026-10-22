@@ -11,17 +11,24 @@ cross-platform API contract is [`docs/sdk-api.md`](../docs/sdk-api.md).
 ## Install
 
 The module is `android/clayver` (package `com.clayver.sdk`, Maven coordinates
-`com.clayver:clayver-android`). Until it is published to a public repository, use one of:
+`com.marioiannotta.clayver:clayver-android`), published to Maven Central:
+
+```kotlin
+// app/build.gradle.kts (repositories: mavenCentral())
+dependencies { implementation("com.marioiannotta.clayver:clayver-android:0.3.3") }
+```
+
+To build against a checkout of this repository instead, use one of:
 
 - **Composite build** (what `examples/android` does):
   ```kotlin
   // settings.gradle.kts
   includeBuild("path/to/clayver/android")
   // app/build.gradle.kts
-  dependencies { implementation("com.clayver:clayver-android:0.3.1") }
+  dependencies { implementation("com.marioiannotta.clayver:clayver-android:0.3.3") }
   ```
 - **Maven local**: `cd android && ./gradlew :clayver:publishToMavenLocal`, add
-  `mavenLocal()` to your repositories, then depend on `com.clayver:clayver-android:0.3.1`.
+  `mavenLocal()` to your repositories, then depend on `com.marioiannotta.clayver:clayver-android:0.3.3`.
 
 The SDK brings the Firebase BoM (auth, database, storage, functions, messaging),
 Compose Material 3 and Coil. Your app still needs the

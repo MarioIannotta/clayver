@@ -8,7 +8,10 @@ A minimal Compose app that shows the whole integration:
 | `MainActivity.kt` | Firebase Auth email/password sign-in and sign-up (linking the anonymous user so chats started before login are kept), `setUserProperties`, `Clayver.logout()` before `FirebaseAuth.signOut()`, a support button with an unread badge (`unreadCountFlow`), `openChat`, `handleIntent` for tapped pushes, a **Register for push notifications** button (asks for the Android 13 notification permission, then passes the FCM token to `Clayver.setPushToken`), and, when `Clayver.agentRole()` is not null, a hint that the chat offers **Switch to support agent** |
 | `ExampleMessagingService.kt` | Delegating `onNewToken` / `onMessageReceived` from the app's own `FirebaseMessagingService` |
 
-The project builds the SDK from source through `includeBuild("../../android")`.
+The app depends on the published SDK, `com.marioiannotta.clayver:clayver-android`, from
+Maven Central. To build the SDK from this repository instead, add
+`clayver.localSdk=true` to `examples/android/gradle.properties` (or pass
+`-Pclayver.localSdk=true`); `settings.gradle.kts` then substitutes it with `../../android`.
 
 ## Run it
 

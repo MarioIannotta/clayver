@@ -15,7 +15,7 @@ let package = Package(
     dependencies: [
         // The native SDK is the repository root package. A relative path breaks
         // once Flutter symlinks this plugin into the app's ephemeral folder.
-        .package(url: "https://github.com/MarioIannotta/clayver.git", exact: "0.3.1"),
+        .package(url: "https://github.com/MarioIannotta/clayver.git", exact: "0.3.3"),
         // Same Firebase iOS SDK version as firebase_core 4.15.0, so the app
         // resolves a single copy.
         .package(url: "https://github.com/firebase/firebase-ios-sdk", exact: "12.19.0"),

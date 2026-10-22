@@ -3,7 +3,7 @@ description: >-
   Flutter plugin for Clayver, open-source in-app customer support whose backend
   runs in your own Firebase project. Thin wrapper over the native iOS and
   Android Clayver SDKs.
-version: 0.3.1
+version: 0.3.3
 repository: https://github.com/MarioIannotta/clayver
 homepage: https://github.com/MarioIannotta/clayver/tree/main/flutter
 topics: [support, chat, firebase, customer-support]

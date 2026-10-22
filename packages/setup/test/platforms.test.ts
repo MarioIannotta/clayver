@@ -3,6 +3,7 @@ import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import { runInit } from "../src/commands/init.js";
 import { runRemove } from "../src/commands/remove.js";
+import { SDK } from "../src/constants.js";
 import { MissingAnswerError } from "../src/core/errors.js";
 import { NonInteractivePrompter } from "../src/core/prompter.js";
 import { copyFixture, FakeRunner, makeDeps, ScriptedPrompter, snapshot } from "./helpers/index.js";
@@ -29,7 +30,7 @@ describe("init per platform", () => {
     const dir = copyFixture("flutter");
     const deps = makeDeps({ cwd: dir, prompter: new ScriptedPrompter([], true) });
     await runInit({ project: "shop-prod", admins: "admin@example.com", skipBackend: true, skipPush: true }, deps);
-    expect(readFileSync(join(dir, "pubspec.yaml"), "utf8")).toContain("dependencies:\n  clayver: ^0.3.1\n  flutter:");
+    expect(readFileSync(join(dir, "pubspec.yaml"), "utf8")).toContain(`dependencies:\n  ${SDK.flutter.package}: ${SDK.flutter.version}\n  flutter:`);
     expect(deps.logger.text()).toContain("flutterfire configure --project=shop-prod");
   });
 

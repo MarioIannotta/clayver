@@ -52,23 +52,10 @@ export const SOURCES = [
       { name: "SDK.version", re: new RegExp(`(export const SDK = \\{\\s*version: ")${V}(")`), render: exact },
       {
         name: "SDK.android.version",
-        re: new RegExp(`(coordinates: "com\\.clayver:clayver-android",\\s*version: ")${V}(")`),
+        re: new RegExp(`(coordinates: "com\\.marioiannotta\\.clayver:clayver-android",\\s*version: ")${V}(")`),
         render: exact,
       },
       { name: "SDK.flutter.version", re: new RegExp(`(package: "clayver",\\s*version: "\\^)${V}(")`), render: caret },
-    ],
-  },
-  {
-    // Expectations derived from SDK.* in constants.ts.
-    file: "packages/setup/test/manifest.test.ts",
-    optional: true,
-    patterns: [{ name: "android dependency line", re: new RegExp(`(com\\.clayver:clayver-android:)${V}(")`, "g"), render: exact, all: true }],
-  },
-  {
-    file: "packages/setup/test/platforms.test.ts",
-    optional: true,
-    patterns: [
-      { name: "pubspec dependency line", re: new RegExp(`(clayver: \\^)${V}(\\\\n)`, "g"), render: caret, all: true },
     ],
   },
 
@@ -115,7 +102,7 @@ export const SOURCES = [
   {
     file: "android/README.md",
     optional: true,
-    patterns: [{ name: "Maven coordinates", re: new RegExp(`(com\\.clayver:clayver-android:)${V}()`, "g"), render: exact, all: true }],
+    patterns: [{ name: "Maven coordinates", re: new RegExp(`(com\\.marioiannotta\\.clayver:clayver-android:)${V}()`, "g"), render: exact, all: true }],
   },
   {
     file: "flutter/README.md",
@@ -128,7 +115,7 @@ export const SOURCES = [
   {
     file: "examples/android/app/build.gradle.kts",
     optional: true,
-    patterns: [{ name: "dependency", re: new RegExp(`(com\\.clayver:clayver-android:)${V}(")`, "g"), render: exact, all: true }],
+    patterns: [{ name: "dependency", re: new RegExp(`(com\\.marioiannotta\\.clayver:clayver-android:)${V}(")`, "g"), render: exact, all: true }],
   },
 ];
 

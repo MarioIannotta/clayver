@@ -52,7 +52,7 @@ android {
 kotlin { jvmToolchain(17) }
 
 dependencies {
-    implementation("com.clayver:clayver-android:0.3.1")
+    implementation("com.marioiannotta.clayver:clayver-android:0.3.3")
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.activity.compose)
